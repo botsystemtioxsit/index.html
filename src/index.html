@@ -5463,6 +5463,17 @@
         </div>
       </div>
 
+      <div class="section-label">Контент</div>
+      <div class="list-group">
+        <div class="toggle-row">
+          <div>
+            <div class="t-label">Чистый режим</div>
+            <div class="t-desc">Для демонстрации — грубые названия лиг заменяются на нейтральные</div>
+          </div>
+          <div class="switch" id="clean-mode-toggle"></div>
+        </div>
+      </div>
+
       <div class="section-label">Уведомления</div>
       <div class="list-group">
         <div class="toggle-row">
@@ -5545,13 +5556,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.33 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 12.09.2026<br>
-        <span style="font-size:11px;">Вход по Telegram теперь принимает обычный @username, а не только внутренний числовой Telegram ID (который не виден в самом Telegram). Работает для аккаунтов, хотя бы раз открывавших игру через настоящий Telegram.</span>
+        <div class="v-num">MICBATTLE v0.4.34 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 13.09.2026<br>
+        <span style="font-size:11px;">Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.33 — вход по Telegram теперь принимает обычный @username, а не только внутренний числовой Telegram ID (который не виден в самом Telegram); работает для аккаунтов, хотя бы раз открывавших игру через настоящий Telegram<br>
           v0.4.32 — веб-версия: переключение Топ/Друзья/Запросы/Кланы/Профиль/Настройки в боковой панели теперь выглядит как переворот страницы книги вбок, а не мгновенная подмена содержимого<br>
           v0.4.31 — полировка анимаций: плавное появление шторок (лёгкий "взлёт" вместо мгновенного скачка), плавный переход между вкладками Сообщества, тактильный отклик на вкладках<br>
           v0.4.30 — добавлен экран выбора входа для гостей сразу после согласия с политикой: продолжить как гость, войти по email или по Telegram ID, либо открыть игру в Telegram-боте<br>
@@ -6071,6 +6083,21 @@
   document.querySelectorAll('[data-toggle]').forEach(sw => {
     sw.addEventListener('click', () => sw.classList.toggle('on'));
   });
+
+  // "Чистый режим" — в отличие от декоративных [data-toggle] выше, этот
+  // реально что-то делает (см. LEAGUES выше): состояние берётся из
+  // localStorage при каждой загрузке страницы, клик сохраняет новое
+  // значение и перезагружает страницу, чтобы LEAGUES пересобрался.
+  (function () {
+    const toggle = document.getElementById('clean-mode-toggle');
+    if (!toggle) return;
+    if (localStorage.getItem('cleanMode') === '1') toggle.classList.add('on');
+    toggle.addEventListener('click', () => {
+      const next = !(localStorage.getItem('cleanMode') === '1');
+      localStorage.setItem('cleanMode', next ? '1' : '0');
+      window.location.reload();
+    });
+  })();
 
   // theme switching — actually repaints the whole app via CSS custom properties
   const themes = {
@@ -7409,9 +7436,19 @@
   // открывалась бы ни одна лига и играть было бы вообще не с чего —
   // "Сын шлюхи" тут работает как бесплатный стартовый уровень, на
   // котором нарабатываются самые первые трофеи для следующих лиг.
+  //
+  // "Чистый режим" (Настройки → Контент, clean-mode-toggle) — просто
+  // подменяет два самых грубых названия на нейтральные для демонстрации;
+  // хранится в localStorage (per-device, как и язык интерфейса), а не в
+  // Firebase — это не игровые данные, а только то, что показывается ЭТОМУ
+  // браузеру. Переключение перезагружает страницу, т.к. LEAGUES строится
+  // один раз при загрузке скрипта и используется во многих местах
+  // (getLeague, лига-пикер, профиль) — проще пересобрать всё заново, чем
+  // гоняться за каждым местом отображения вручную.
+  window.cleanMode = localStorage.getItem('cleanMode') === '1';
   const LEAGUES = [
-    { name: 'Сын шлюхи',        minPoints: 0,     stake: 10,  penalty: 0,   emoji: '💀',  color: '#6B4226',    borderColor: 'rgba(107,66,38,0.35)',   bgColor: 'rgba(107,66,38,0.08)' },
-    { name: 'Говно из-под коня',minPoints: 500,   stake: 25,  penalty: 25,  emoji: '💩',  color: '#8B7355',    borderColor: 'rgba(139,115,85,0.35)',  bgColor: 'rgba(139,115,85,0.08)' },
+    { name: window.cleanMode ? 'Новичок' : 'Сын шлюхи',        minPoints: 0,     stake: 10,  penalty: 0,   emoji: '💀',  color: '#6B4226',    borderColor: 'rgba(107,66,38,0.35)',   bgColor: 'rgba(107,66,38,0.08)' },
+    { name: window.cleanMode ? 'Слабак' : 'Говно из-под коня', minPoints: 500,   stake: 25,  penalty: 25,  emoji: '💩',  color: '#8B7355',    borderColor: 'rgba(139,115,85,0.35)',  bgColor: 'rgba(139,115,85,0.08)' },
     { name: 'Отброс общества',  minPoints: 1500,  stake: 50,  penalty: 50,  emoji: '🗑️', color: '#B08D57',    borderColor: 'rgba(176,141,87,0.35)',  bgColor: 'rgba(176,141,87,0.08)' },
     { name: 'Шавка подзаборная',minPoints: 3000,  stake: 100, penalty: 100, emoji: '🐕',  color: '#C9C9CE',    borderColor: 'rgba(201,201,206,0.35)', bgColor: 'rgba(201,201,206,0.08)' },
     { name: 'Уважаемый тролль', minPoints: 6000,  stake: 200, penalty: 200, emoji: '😏',  color: '#F2B705',    borderColor: 'rgba(242,183,5,0.35)',   bgColor: 'rgba(242,183,5,0.08)' },
