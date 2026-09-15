@@ -5546,13 +5546,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.38 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.39 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 15.09.2026<br>
-        <span style="font-size:11px;">Вход в свой аккаунт: три отдельных поля (email/username/Telegram ID) объединены в одно — плюс поддержка кода входа от администрации, который логинит сразу, без подтверждения.</span>
+        <span style="font-size:11px;">Единое поле входа (email/username/Telegram ID) теперь также принимает токен доступа — отдельный, ни к какому игроку не привязанный ключ, который создаётся и настраивается в панели администрации и логинит сразу, без подтверждения.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.38 — (откачено) добавлялся код входа от администрации, привязанный к конкретному игроку — заменён на отдельный, ни к чему не привязанный токен доступа (см. текущую версию)<br>
           v0.4.37 — Firebase App Check активирован (реальный ключ reCAPTCHA), пока в режиме мониторинга — видно в консоли Firebase, кто ходит в базу мимо приложения<br>
           v0.4.36 — усилены проверки формата данных в правилах базы + подключён Firebase App Check (пока только мониторинг, без блокировки)<br>
           v0.4.35 — Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени)<br>
@@ -5922,31 +5923,56 @@
   function usernameToKey(username) {
     return username.trim().replace(/^@/, '').toLowerCase();
   }
-  // ===== единое поле входа: email, @username в Telegram или код от
-  // администрации — всё в одно поле, тип определяется по содержимому. =====
-  // Код от администрации (loginTokens/<token> → telegramId, выдаётся
-  // вручную из battle-admin-bot, см. renderDeviceTokenBlock-соседний блок
-  // "Токен входа" там) входит СРАЗУ, без approve — потому что сам факт
-  // его существования уже означает, что superadmin подтвердил доступ
-  // заранее, когда создавал токен. Email и username идут через обычную
-  // заявку с ручным подтверждением в Сообщество → Запросы, как раньше.
+  // ===== единое поле входа: email, @username в Telegram или токен
+  // доступа — всё в одно поле, тип определяется по содержимому. =====
+  // Токен доступа (accessTokens/<token>, создаётся и настраивается в
+  // battle-admin-bot, вкладка "Токены доступа") — НЕ привязан ни к
+  // какому существующему игроку. Он входит СРАЗУ, без approve, потому
+  // что сам факт его существования уже означает, что superadmin выдал
+  // доступ заранее, когда создавал токен и решал, что именно этот токен
+  // открывает. Если у токена включён игровой доступ, при первом входе
+  // заводится отдельная, ни к чему не привязанная игровая запись
+  // users/token_<токен> — удаление токена в панели делает вход по нему
+  // невозможным, но саму запись не трогает. Email и username по-прежнему
+  // идут через обычную заявку с ручным подтверждением в Сообщество →
+  // Запросы.
   async function requestLogin(ids) {
     const input = document.getElementById(ids.input);
     const raw = input.value.trim();
     const statusEl = document.getElementById(ids.status);
-    if (!raw) { alert('Впиши email, username или код входа'); return; }
+    if (!raw) { alert('Впиши email, username или токен доступа'); return; }
     const btn = document.getElementById(ids.btn);
     stopWaitingForLoginApproval();
     btn.disabled = true;
     btn.textContent = 'Проверяем…';
     statusEl.style.display = 'none';
     try {
-      // 1. код от администрации — прямой одноразовый(на самом деле
-      // многоразовый, см. battle-admin-bot) вход без approve
-      const tokenSnap = await db.ref('loginTokens/' + raw).once('value');
-      const tokenTelegramId = tokenSnap.val();
-      if (tokenTelegramId) {
-        window.localStorage.setItem('battleTelegramId', tokenTelegramId);
+      // 1. токен доступа — прямой вход без approve, если токену дан
+      // игровой доступ; никакого users/<uid> с этим telegramId не
+      // существует, запись создаётся с нуля под синтетическим id
+      const accessTokenSnap = await db.ref('accessTokens/' + raw).once('value');
+      const accessToken = accessTokenSnap.val();
+      if (accessToken) {
+        if (!accessToken.permissions?.game) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = 'var(--live)';
+          statusEl.textContent = 'Этот токен не даёт доступа к игре.';
+          btn.disabled = false;
+          btn.textContent = ids.defaultText;
+          return;
+        }
+        const syntheticId = 'token_' + raw;
+        const existing = await db.ref('users/' + syntheticId).once('value');
+        if (!existing.exists()) {
+          await db.ref('users/' + syntheticId).set({
+            role: 'user',
+            firstName: accessToken.label ? ('Токен: ' + accessToken.label) : 'Токен-доступ',
+            status: 'active',
+            createdAt: Date.now(),
+            viaAccessToken: raw
+          });
+        }
+        window.localStorage.setItem('battleTelegramId', syntheticId);
         statusEl.style.display = 'block';
         statusEl.style.color = 'var(--muted)';
         statusEl.textContent = '✅ Вход разрешён, обновляем…';

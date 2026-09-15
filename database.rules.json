@@ -38,15 +38,25 @@
         },
         "pendingNameRejectionReason": {
           ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
-        },
-        "loginToken": {
-          ".validate": "!newData.exists() || newData.val().matches(/^[0-9a-f]+$/)"
         }
       }
     },
-    "loginTokens": {
+    "accessTokens": {
       "$token": {
-        ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)"
+        "label": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "permissions": {
+          "$permKey": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
       }
     },
     "clans": {
