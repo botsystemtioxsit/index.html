@@ -1569,10 +1569,9 @@
      каждый раз новый (см. комментарий у resolveIdentity), этот экран
      будет показываться гостю при каждом визите — это осознанно, а не
      баг: у гостя каждый раз есть шанс войти в свой настоящий аккаунт.
-     Сами поля email/Telegram ID и их обработчики переиспользуют те же
-     функции requestLoginByEmail/requestLoginByTelegramId, что и
-     Настройки → Аккаунт (см. дальше по файлу) — просто с другими id
-     элементов. -->
+     Единое поле входа и его обработчик переиспользуют ту же функцию
+     requestLogin, что и Настройки → Аккаунт (см. дальше по файлу) —
+     просто с другими id элементов. -->
 <div class="overlay" id="login-choice-overlay" style="background:#000; z-index:1001;">
   <div style="text-align:center; max-width:320px; width:100%;">
     <div style="font-size:40px; margin-bottom:12px;">👋</div>
@@ -1580,17 +1579,11 @@
     <button class="sheet-cta secondary" id="btn-login-choice-guest" style="margin-top:0; margin-bottom:16px;">Продолжить как гость</button>
 
     <div style="text-align:center; color:var(--muted); font-size:12px; margin:14px 0;">или войти в свой аккаунт</div>
-    <div style="text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;">
-      <input type="email" id="login-choice-email-input" placeholder="твой email" autocomplete="email" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
-      <button id="btn-login-choice-email" style="width:100%; background:var(--gold); border:none; color:#fff; border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход</button>
-      <div class="t-desc" id="login-choice-email-status" style="display:none; margin-top:8px; line-height:1.4; text-align:left;"></div>
-    </div>
-    <div style="text-align:center; color:var(--muted); font-size:12px; margin:12px 0;">или</div>
     <div style="text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px;">
-      <input type="text" id="login-choice-tgid-input" placeholder="твой @username в Telegram" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
-      <button id="btn-login-choice-tgid" style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход по username</button>
-      <div class="t-desc" id="login-choice-tgid-status" style="display:none; margin-top:8px; line-height:1.4; text-align:left;"></div>
-      <div class="t-desc" style="margin-top:8px; line-height:1.4; text-align:left;">Найдётся, только если этот аккаунт хотя бы раз открывал игру через настоящий Telegram. Если не находит — можно ввести числовой Telegram ID (его покажет бот @userinfobot).</div>
+      <input type="text" id="login-choice-universal-input" placeholder="email, @username в Telegram или код от администрации" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
+      <button id="btn-login-choice-universal" style="width:100%; background:var(--gold); border:none; color:#fff; border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход</button>
+      <div class="t-desc" id="login-choice-universal-status" style="display:none; margin-top:8px; line-height:1.4; text-align:left;"></div>
+      <div class="t-desc" style="margin-top:8px; line-height:1.4; text-align:left;">Email/username сработают, только если раньше привязаны или уже заходили через настоящий Telegram, и потребуют подтверждения в Сообщество → Запросы. Код от администрации входит сразу, без подтверждения.</div>
     </div>
 
     <a href="https://t.me/troll_battle_bot" target="_blank" rel="noopener" style="display:block; color:var(--muted); font-size:12.5px; text-decoration:underline;">Открыть игру в Telegram-боте</a>
@@ -1630,9 +1623,9 @@
   // Гейт выбора входа для гостей — см. #login-choice-overlay выше.
   // continueFn — это proceedAfterConsent() из resolveIdentity().then(...),
   // тот же самый, что вызывается напрямую для не-гостей. Обработчики
-  // email/Telegram-ID полей (requestLoginByEmail/requestLoginByTelegramId)
-  // определены позже по файлу вместе с одноимённым блоком в Настройках —
-  // тут просто вешаем их на кнопки с другими id, никакой отдельной логики.
+  // единого поля входа (requestLogin) определён позже по файлу вместе с
+  // одноимённым блоком в Настройках — тут просто вешаем его на кнопку
+  // с другим id, никакой отдельной логики.
   window.showLoginChoiceGate = function (telegramId, continueFn) {
     const overlay = document.getElementById('login-choice-overlay');
     const btn = document.getElementById('btn-login-choice-guest');
@@ -5527,25 +5520,10 @@
            реальная защита — это ручное подтверждение на стороне аккаунта. -->
       <div id="guest-login-block" style="display:none; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:0 0 16px;">
         <div class="t-label" style="margin-bottom:10px;">Войти в свой аккаунт</div>
-        <input type="email" id="guest-login-email-input" placeholder="твой email" autocomplete="email" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
-        <button id="btn-guest-login" style="width:100%; background:var(--gold); border:none; color:#fff; border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход</button>
-        <div class="t-desc" id="guest-login-status" style="display:none; margin-top:8px; line-height:1.4;"></div>
-        <div class="t-desc" style="margin-top:8px; line-height:1.4;">Нужно, чтобы этот email раньше привязали в настоящем аккаунте (Настройки → Аккаунт → «Вход с других устройств»). Заявка придёт туда — в Сообщество → Запросы — подтверди её оттуда.</div>
-
-        <!-- Альтернатива запросу по email: та же самая заявка-на-вход, но
-             привязанная сразу к Telegram ID вместо email (без шага поиска
-             через emailLogins). Никакого официального Telegram Login
-             Widget/OAuth тут больше нет — Telegram убрал классический
-             способ привязки домена для виджета, и городить полноценный
-             OpenID Connect ради этого не стали. Реальная защита та же, что
-             и у email-варианта: не проверка подписи, а ручное подтверждение
-             живым человеком в Сообщество → Запросы (см. requestLoginByTelegramId
-             ниже). -->
-        <div style="text-align:center; color:var(--muted); font-size:12px; margin:14px 0;">или</div>
-        <input type="text" id="guest-login-tgid-input" placeholder="твой @username в Telegram" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
-        <button id="btn-guest-login-tgid" style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход по username</button>
-        <div class="t-desc" id="guest-login-tgid-status" style="display:none; margin-top:8px; line-height:1.4;"></div>
-        <div class="t-desc" style="margin-top:8px; line-height:1.4;">Найдётся, только если этот аккаунт хотя бы раз открывал игру через настоящий Telegram. Если не находит — можно ввести числовой Telegram ID (его покажет бот @userinfobot).</div>
+        <input type="text" id="guest-login-universal-input" placeholder="email, @username в Telegram или код от администрации" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
+        <button id="btn-guest-login-universal" style="width:100%; background:var(--gold); border:none; color:#fff; border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Запросить вход</button>
+        <div class="t-desc" id="guest-login-universal-status" style="display:none; margin-top:8px; line-height:1.4;"></div>
+        <div class="t-desc" style="margin-top:8px; line-height:1.4;">Email — нужно, чтобы его раньше привязали в настоящем аккаунте (Настройки → Аккаунт → «Вход с других устройств»). Username — только если этот аккаунт хотя бы раз открывал игру через настоящий Telegram. В обоих случаях заявка придёт в Сообщество → Запросы на подтверждение. Код от администрации входит сразу, без подтверждения.</div>
       </div>
 
       <!-- показывается только настоящему аккаунту (Telegram или уже вошёл
@@ -5568,13 +5546,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.37 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.38 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 15.09.2026<br>
-        <span style="font-size:11px;">Firebase App Check активирован (реальный ключ reCAPTCHA), пока в режиме мониторинга — видно в консоли Firebase, кто ходит в базу мимо приложения.</span>
+        <span style="font-size:11px;">Вход в свой аккаунт: три отдельных поля (email/username/Telegram ID) объединены в одно — плюс поддержка кода входа от администрации, который логинит сразу, без подтверждения.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.37 — Firebase App Check активирован (реальный ключ reCAPTCHA), пока в режиме мониторинга — видно в консоли Firebase, кто ходит в базу мимо приложения<br>
           v0.4.36 — усилены проверки формата данных в правилах базы + подключён Firebase App Check (пока только мониторинг, без блокировки)<br>
           v0.4.35 — Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени)<br>
           v0.4.34 — Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные<br>
@@ -5877,9 +5856,9 @@
     return 'браузер';
   }
 
-  // ===== запрос на вход (email или Telegram ID) — общая логика =====
-  // Используется и в Настройки → Аккаунт (btn-guest-login/btn-guest-login-tgid),
-  // и на экране выбора входа для гостей (btn-login-choice-email/-tgid, см.
+  // ===== запрос на вход (единое поле — email/username/код) — общая логика =====
+  // Используется и в Настройки → Аккаунт (btn-guest-login-universal),
+  // и на экране выбора входа для гостей (btn-login-choice-universal, см.
   // #login-choice-overlay в начале body) — просто с разными id элементов,
   // сама заявка (loginRequests) и её подтверждение (Сообщество → Запросы,
   // approveLoginRequest ниже) везде одинаковые. Тайм-аут ожидания — 5 минут,
@@ -5931,38 +5910,6 @@
       }, 5 * 60 * 1000);
     });
   }
-  async function requestLoginByEmail(ids) {
-    const emailInput = document.getElementById(ids.input);
-    const email = emailInput.value.trim();
-    const statusEl = document.getElementById(ids.status);
-    if (!email || !email.includes('@')) { alert('Впиши email'); return; }
-    const btn = document.getElementById(ids.btn);
-    stopWaitingForLoginApproval();
-    btn.disabled = true;
-    btn.textContent = 'Ищем аккаунт…';
-    statusEl.style.display = 'none';
-    try {
-      const linkSnap = await db.ref('emailLogins/' + emailToKey(email)).once('value');
-      const targetTelegramId = linkSnap.val();
-      if (!targetTelegramId) {
-        statusEl.style.display = 'block';
-        statusEl.style.color = 'var(--live)';
-        statusEl.textContent = 'Эта почта не привязана ни к одному аккаунту.';
-        btn.disabled = false;
-        btn.textContent = ids.defaultText;
-        return;
-      }
-      await sendLoginRequestAndWait(targetTelegramId, statusEl, btn, ids.defaultText);
-    } catch (err) {
-      console.error(err);
-      window.showDebugError?.('Запрос входа по email', err);
-      statusEl.style.display = 'block';
-      statusEl.style.color = 'var(--live)';
-      statusEl.textContent = 'Не удалось отправить запрос: ' + (err.message || err);
-      btn.disabled = false;
-      btn.textContent = ids.defaultText;
-    }
-  }
   // Обычные пользователи почти никогда не знают свой числовой Telegram ID
   // (он нигде не показывается в самом Telegram) — знают только username
   // (@имя). usernameToKey нормализует его в ключ для users/<uid> —
@@ -5975,20 +5922,58 @@
   function usernameToKey(username) {
     return username.trim().replace(/^@/, '').toLowerCase();
   }
-  async function requestLoginByTelegramId(ids) {
-    const idInput = document.getElementById(ids.input);
-    const raw = idInput.value.trim();
+  // ===== единое поле входа: email, @username в Telegram или код от
+  // администрации — всё в одно поле, тип определяется по содержимому. =====
+  // Код от администрации (loginTokens/<token> → telegramId, выдаётся
+  // вручную из battle-admin-bot, см. renderDeviceTokenBlock-соседний блок
+  // "Токен входа" там) входит СРАЗУ, без approve — потому что сам факт
+  // его существования уже означает, что superadmin подтвердил доступ
+  // заранее, когда создавал токен. Email и username идут через обычную
+  // заявку с ручным подтверждением в Сообщество → Запросы, как раньше.
+  async function requestLogin(ids) {
+    const input = document.getElementById(ids.input);
+    const raw = input.value.trim();
     const statusEl = document.getElementById(ids.status);
-    if (!raw) { alert('Впиши Telegram ID или username (@имя)'); return; }
-    const isNumericId = /^\d+$/.test(raw);
+    if (!raw) { alert('Впиши email, username или код входа'); return; }
     const btn = document.getElementById(ids.btn);
     stopWaitingForLoginApproval();
     btn.disabled = true;
-    btn.textContent = isNumericId ? 'Отправляем заявку…' : 'Ищем аккаунт…';
+    btn.textContent = 'Проверяем…';
     statusEl.style.display = 'none';
     try {
-      let targetTelegramId = raw;
-      if (!isNumericId) {
+      // 1. код от администрации — прямой одноразовый(на самом деле
+      // многоразовый, см. battle-admin-bot) вход без approve
+      const tokenSnap = await db.ref('loginTokens/' + raw).once('value');
+      const tokenTelegramId = tokenSnap.val();
+      if (tokenTelegramId) {
+        window.localStorage.setItem('battleTelegramId', tokenTelegramId);
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--muted)';
+        statusEl.textContent = '✅ Вход разрешён, обновляем…';
+        setTimeout(() => window.location.reload(), 400);
+        return;
+      }
+
+      let targetTelegramId;
+      if (raw.includes('@') && !raw.startsWith('@')) {
+        // 2. email
+        btn.textContent = 'Ищем аккаунт…';
+        const linkSnap = await db.ref('emailLogins/' + emailToKey(raw)).once('value');
+        targetTelegramId = linkSnap.val();
+        if (!targetTelegramId) {
+          statusEl.style.display = 'block';
+          statusEl.style.color = 'var(--live)';
+          statusEl.textContent = 'Эта почта не привязана ни к одному аккаунту.';
+          btn.disabled = false;
+          btn.textContent = ids.defaultText;
+          return;
+        }
+      } else if (/^\d+$/.test(raw)) {
+        // 3. числовой Telegram ID напрямую
+        targetTelegramId = raw;
+      } else {
+        // 4. @username в Telegram
+        btn.textContent = 'Ищем аккаунт…';
         const usernameSnap = await db.ref('usernames/' + usernameToKey(raw)).once('value');
         targetTelegramId = usernameSnap.val();
         if (!targetTelegramId) {
@@ -6013,7 +5998,7 @@
       await sendLoginRequestAndWait(targetTelegramId, statusEl, btn, ids.defaultText);
     } catch (err) {
       console.error(err);
-      window.showDebugError?.('Запрос входа по Telegram ID/username', err);
+      window.showDebugError?.('Запрос входа', err);
       statusEl.style.display = 'block';
       statusEl.style.color = 'var(--live)';
       statusEl.textContent = 'Не удалось отправить запрос: ' + (err.message || err);
@@ -6021,17 +6006,11 @@
       btn.textContent = ids.defaultText;
     }
   }
-  document.getElementById('btn-guest-login')?.addEventListener('click', () => requestLoginByEmail({
-    input: 'guest-login-email-input', btn: 'btn-guest-login', status: 'guest-login-status', defaultText: 'Запросить вход'
+  document.getElementById('btn-guest-login-universal')?.addEventListener('click', () => requestLogin({
+    input: 'guest-login-universal-input', btn: 'btn-guest-login-universal', status: 'guest-login-universal-status', defaultText: 'Запросить вход'
   }));
-  document.getElementById('btn-guest-login-tgid')?.addEventListener('click', () => requestLoginByTelegramId({
-    input: 'guest-login-tgid-input', btn: 'btn-guest-login-tgid', status: 'guest-login-tgid-status', defaultText: 'Запросить вход по username'
-  }));
-  document.getElementById('btn-login-choice-email')?.addEventListener('click', () => requestLoginByEmail({
-    input: 'login-choice-email-input', btn: 'btn-login-choice-email', status: 'login-choice-email-status', defaultText: 'Запросить вход'
-  }));
-  document.getElementById('btn-login-choice-tgid')?.addEventListener('click', () => requestLoginByTelegramId({
-    input: 'login-choice-tgid-input', btn: 'btn-login-choice-tgid', status: 'login-choice-tgid-status', defaultText: 'Запросить вход по username'
+  document.getElementById('btn-login-choice-universal')?.addEventListener('click', () => requestLogin({
+    input: 'login-choice-universal-input', btn: 'btn-login-choice-universal', status: 'login-choice-universal-status', defaultText: 'Запросить вход'
   }));
 
   // ===== привязка email (для будущих запросов на вход с других устройств) =====
@@ -6732,7 +6711,7 @@
     }
 
     // Индекс username → telegramId (usernames/<key>), чтобы вход по
-    // Telegram ID (см. requestLoginByTelegramId/usernameToKey выше) можно
+    // Telegram ID (см. requestLogin/usernameToKey выше) можно
     // было делать по обычному @username, а не по внутреннему числовому
     // id, который никому не показывается в самом Telegram. Пишется тут,
     // а не при создании аккаунта выше, чтобы индекс обновлялся и для уже

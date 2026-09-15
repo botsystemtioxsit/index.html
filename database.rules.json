@@ -38,7 +38,15 @@
         },
         "pendingNameRejectionReason": {
           ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        },
+        "loginToken": {
+          ".validate": "!newData.exists() || newData.val().matches(/^[0-9a-f]+$/)"
         }
+      }
+    },
+    "loginTokens": {
+      "$token": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)"
       }
     },
     "clans": {
