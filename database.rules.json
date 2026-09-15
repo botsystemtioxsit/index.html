@@ -7,6 +7,18 @@
         "role": {
           ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || newData.val() === 'admin' || newData.val() === 'superadmin'"
         },
+        "status": {
+          ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned'"
+        },
+        "points": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "starsBalance": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "firstName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"
+        },
         "deviceToken": {
           ".validate": "!newData.exists() || newData.val().matches(/^[0-9a-f]+$/)"
         },
@@ -17,6 +29,28 @@
           "$permKey": {
             ".validate": "newData.isBoolean()"
           }
+        },
+        "pendingName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 24)"
+        },
+        "pendingNameStatus": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'rejected'"
+        },
+        "pendingNameRejectionReason": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        }
+      }
+    },
+    "clans": {
+      "$code": {
+        "name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 24)"
+        },
+        "status": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
+        },
+        "chatLinkStatus": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
         }
       }
     },
