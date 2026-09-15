@@ -5568,13 +5568,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.35 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.36 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 15.09.2026<br>
-        <span style="font-size:11px;">Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени).</span>
+        <span style="font-size:11px;">Усилены проверки формата данных в правилах базы + подключён Firebase App Check (пока только мониторинг, без блокировки) — видно в консоли Firebase, кто ходит в базу мимо приложения.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.35 — Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени)<br>
           v0.4.34 — Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные<br>
           v0.4.33 — вход по Telegram теперь принимает обычный @username, а не только внутренний числовой Telegram ID (который не виден в самом Telegram); работает для аккаунтов, хотя бы раз открывавших игру через настоящий Telegram<br>
           v0.4.32 — веб-версия: переключение Топ/Друзья/Запросы/Кланы/Профиль/Настройки в боковой панели теперь выглядит как переворот страницы книги вбок, а не мгновенная подмена содержимого<br>
@@ -6608,6 +6609,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 <script>
   const tg = window.Telegram?.WebApp;
@@ -6633,6 +6635,32 @@
     appId: "1:570732456851:web:1a5e2ec46f5abf0e22d666"
   };
   firebase.initializeApp(firebaseConfig);
+
+  // ===== Firebase App Check — только мониторинг, БЕЗ Enforce =====
+  // Проверяет не "кто" пишет (для этого нужен был бы Firebase Auth,
+  // которого в проекте принципиально нет), а что запрос идёт из
+  // настоящей загруженной страницы игры в браузере, а не из левого
+  // curl/скрипта, который просто взял публичный firebaseConfig выше и
+  // бьёт по базе напрямую. Сайт зарегистрирован с провайдером reCAPTCHA
+  // v3 в Firebase Console → App Check; APP_CHECK_SITE_KEY ниже — открытый
+  // ключ сайта (не секрет, как и весь firebaseConfig).
+  //
+  // Enforce сознательно НЕ включён на стороне Firebase (это отдельная
+  // настройка в консоли, не в коде): два GitHub Actions workflow в этом
+  // и соседнем (battle-data-admin-bot) репозитории читают базу голым
+  // curl без какого-либо App Check токена (sync-error-reports.yml,
+  // db-snapshot.yml) — Enforce сломал бы их. Пока что это только сбор
+  // статистики "кто ходит в базу мимо приложения" в консоли Firebase.
+  const APP_CHECK_SITE_KEY = 'TODO_REPLACE_RECAPTCHA_V3_SITE_KEY';
+  if (APP_CHECK_SITE_KEY && !APP_CHECK_SITE_KEY.startsWith('TODO_')) {
+    try {
+      const appCheck = firebase.appCheck();
+      appCheck.activate(APP_CHECK_SITE_KEY, true);
+    } catch (err) {
+      console.error('App Check activate failed', err);
+    }
+  }
+
   const db = firebase.database();
 
   // Генерирует случайный внутренний ID игрока, например "PLR-8X3F9K"
