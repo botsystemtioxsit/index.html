@@ -5568,13 +5568,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.36 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.37 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 15.09.2026<br>
-        <span style="font-size:11px;">Усилены проверки формата данных в правилах базы + подключён Firebase App Check (пока только мониторинг, без блокировки) — видно в консоли Firebase, кто ходит в базу мимо приложения.</span>
+        <span style="font-size:11px;">Firebase App Check активирован (реальный ключ reCAPTCHA), пока в режиме мониторинга — видно в консоли Firebase, кто ходит в базу мимо приложения.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.36 — усилены проверки формата данных в правилах базы + подключён Firebase App Check (пока только мониторинг, без блокировки)<br>
           v0.4.35 — Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени)<br>
           v0.4.34 — Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные<br>
           v0.4.33 — вход по Telegram теперь принимает обычный @username, а не только внутренний числовой Telegram ID (который не виден в самом Telegram); работает для аккаунтов, хотя бы раз открывавших игру через настоящий Telegram<br>
@@ -6651,7 +6652,7 @@
   // curl без какого-либо App Check токена (sync-error-reports.yml,
   // db-snapshot.yml) — Enforce сломал бы их. Пока что это только сбор
   // статистики "кто ходит в базу мимо приложения" в консоли Firebase.
-  const APP_CHECK_SITE_KEY = 'TODO_REPLACE_RECAPTCHA_V3_SITE_KEY';
+  const APP_CHECK_SITE_KEY = '6LfMt70tAAAAAB6XPQlpPDQrTYxwED1c8PfnSQEu';
   if (APP_CHECK_SITE_KEY && !APP_CHECK_SITE_KEY.startsWith('TODO_')) {
     try {
       const appCheck = firebase.appCheck();
