@@ -5507,6 +5507,18 @@
         </div>
       </div>
 
+      <!-- ===== смена никнейма — с одобрением модератора, как ссылка на чат
+           клана (submitClanChatLink/renderClanChatLinkBlock) =====
+           Пишет pendingName/pendingNameStatus/pendingNameRejectionReason в
+           users/<telegramId>, НЕ трогая firstName напрямую — displayName
+           меняется только когда модератор одобрит заявку (см. battle-admin-bot,
+           analog approveClanChat/rejectClanChat), это и есть защита от
+           рекламы/спама в имени. renderNicknameBlock вызывается при каждом
+           открытии Настроек (см. settings-btn ниже), т.к. статус заявки
+           могут одобрить/отклонить, пока шторка была закрыта. -->
+      <div class="section-label">Никнейм</div>
+      <div class="list-group" id="nickname-change-block"></div>
+
       <!-- показывается только гостю (открыл не из Telegram, своего email ещё
            не вводил) — запрос на вход, а не письмо: заявка уходит тому
            настоящему аккаунту, где этот email привязан (см. emailLogins в
@@ -5556,13 +5568,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.34 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 13.09.2026<br>
-        <span style="font-size:11px;">Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные.</span>
+        <div class="v-num">MICBATTLE v0.4.35 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 15.09.2026<br>
+        <span style="font-size:11px;">Настройки → Никнейм: теперь можно отправить заявку на смену никнейма — новое имя появится только после одобрения администрацией (защита от рекламы/спама в имени).</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.34 — Настройки → Контент: добавлен "Чистый режим" для демонстрации — заменяет два самых грубых названия лиг на нейтральные<br>
           v0.4.33 — вход по Telegram теперь принимает обычный @username, а не только внутренний числовой Telegram ID (который не виден в самом Telegram); работает для аккаунтов, хотя бы раз открывавших игру через настоящий Telegram<br>
           v0.4.32 — веб-версия: переключение Топ/Друзья/Запросы/Кланы/Профиль/Настройки в боковой панели теперь выглядит как переворот страницы книги вбок, а не мгновенная подмена содержимого<br>
           v0.4.31 — полировка анимаций: плавное появление шторок (лёгкий "взлёт" вместо мгновенного скачка), плавный переход между вкладками Сообщества, тактильный отклик на вкладках<br>
@@ -5711,6 +5724,57 @@
     const el = document.getElementById('version-history-full');
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
   });
+  // ===== смена никнейма — с одобрением модератора, как ссылка на чат
+  // клана (submitClanChatLink/renderClanChatLinkBlock выше в файле).
+  // pendingName/pendingNameStatus/pendingNameRejectionReason пишутся в
+  // users/<telegramId>, firstName НЕ трогается до одобрения — реальная
+  // защита от рекламы/спама в имени именно в этом: показываемое имя не
+  // меняется, пока живой модератор не одобрит заявку в battle-admin-bot
+  // (см. analog approveClanChat/rejectClanChat там).
+  function renderNicknameBlock() {
+    const container = document.getElementById('nickname-change-block');
+    if (!container) return;
+    const player = window.currentPlayer || {};
+    const status = player.pendingNameStatus || null;
+    let statusNote = '';
+    if (status === 'pending') statusNote = `<div style="font-size:11px; color:var(--gold); margin-bottom:6px;">🕓 Никнейм «${escapeHtml(player.pendingName || '')}» на проверке у администрации</div>`;
+    else if (status === 'rejected') statusNote = `<div style="font-size:11px; color:var(--live); margin-bottom:6px;">Отклонено: ${escapeHtml(player.pendingNameRejectionReason || 'причина не указана')}</div>`;
+    container.innerHTML = `
+      <div class="plain-row" style="cursor:default; flex-direction:column; align-items:stretch;">
+        <div class="t-label" style="margin-bottom:8px;">Текущий никнейм: ${escapeHtml(player.firstName || 'Игрок')}</div>
+        ${statusNote}
+        <input type="text" id="nickname-change-input" maxlength="24" placeholder="новый никнейм" style="width:100%; box-sizing:border-box; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; margin-bottom:8px;">
+        <button id="btn-nickname-change-submit" style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer;">Отправить на проверку</button>
+        <div class="t-desc" style="margin-top:8px; line-height:1.4;">Новый никнейм появится не сразу — администрация проверяет заявки вручную, чтобы никто не ставил рекламу и подобное.</div>
+      </div>
+    `;
+    document.getElementById('btn-nickname-change-submit')?.addEventListener('click', submitNicknameChange);
+    window.applyTranslations?.(container);
+  }
+  function submitNicknameChange() {
+    const telegramId = window.currentTelegramId;
+    if (!telegramId) return;
+    const input = document.getElementById('nickname-change-input');
+    const newName = input.value.trim();
+    if (!newName) { alert('Впиши новый никнейм'); return; }
+    if (newName.length > 24) { alert('Слишком длинный никнейм (максимум 24 символа)'); return; }
+    const btn = document.getElementById('btn-nickname-change-submit');
+    btn.disabled = true;
+    db.ref('users/' + telegramId).update({ pendingName: newName, pendingNameStatus: 'pending', pendingNameRejectionReason: null })
+      .then(() => {
+        if (window.currentPlayer) {
+          window.currentPlayer.pendingName = newName;
+          window.currentPlayer.pendingNameStatus = 'pending';
+          window.currentPlayer.pendingNameRejectionReason = null;
+        }
+        renderNicknameBlock();
+      })
+      .catch((err) => {
+        window.showDebugError?.('Смена никнейма', err);
+        alert('Не удалось отправить заявку, попробуй ещё раз');
+        btn.disabled = false;
+      });
+  }
   document.getElementById('settings-btn').addEventListener('click', () => {
     window.closeOtherDockOverlays?.(settingsOverlay);
     settingsOverlay.classList.add('open');
@@ -5721,6 +5785,19 @@
     // даже если аккаунт был давно привязан
     window.updateGoogleAccountUI?.(window.currentPlayer?.attachedEmail);
     window.updateAccountLoginUI?.();
+    renderNicknameBlock();
+    // подтягиваем свежую запись — статус заявки на никнейм (и сам
+    // никнейм, если его уже одобрили) мог измениться, пока шторка была
+    // закрыта, без этого пришлось бы ждать полной перезагрузки страницы
+    if (window.currentTelegramId) {
+      db.ref('users/' + window.currentTelegramId).once('value').then((snap) => {
+        const fresh = snap.val();
+        if (!fresh) return;
+        window.currentPlayer = fresh;
+        applyProfileUser(fresh);
+        renderNicknameBlock();
+      }).catch(() => {});
+    }
   });
   document.getElementById('settings-close-btn').addEventListener('click', () => settingsOverlay.classList.remove('open'));
   settingsOverlay.addEventListener('click', (e) => { if(e.target === settingsOverlay) settingsOverlay.classList.remove('open'); });
