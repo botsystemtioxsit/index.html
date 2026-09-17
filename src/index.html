@@ -5557,18 +5557,26 @@
 
       <!-- ===== "Приложения" — ссылки на все способы открыть эту же игру,
            чтобы не логиниться заново на каждом устройстве: открыл бота в
-           Телеграме → сразу отсюда скачал нужный файл. Все три сборки
-           (.exe/.apk/AppImage+.deb+.tar.gz) собираются автоматически в CI при
-           каждом изменении desktop/ или android/ (см. build-windows-
-           installer.yml, build-android-apk.yml, build-linux-installer.yml
-           в .github/workflows/) и публикуются под ФИКСИРОВАННЫМИ тегами
-           релиза (…-latest) — ссылки ниже не протухают между сборками.
-           Открываем через tg.openLink, если игра запущена внутри Telegram
-           Web App, иначе обычным window.open — см. openAppLink() в JS. -->
+           Телеграме → сразу отсюда скачал нужный файл. Windows и Linux
+           собираются в CI (build-windows-installer.yml, build-linux-
+           installer.yml) и публикуются в ОДИН общий релиз репозитория под
+           тегом v<версия из desktop/package.json> — так нужно electron-
+           updater (см. main.js): оба таргета кладут туда файлы обновления
+           (latest.yml / latest-linux.yml), и desktop-приложение само
+           проверяет и тихо ставит новую версию при следующем перезапуске,
+           без похода на GitHub вручную — это касается только самой
+           обёртки (иконка/разрешения/Electron), не самой игры, которая и
+           так всегда живая. Ссылка ниже — .../releases/latest, отдаётся
+           самим GitHub и всегда указывает на актуальный релиз. Android
+           собран отдельно (build-android-apk.yml) под своим фиксированным
+           тегом android-latest — WebView-обёртка, никакого electron-
+           updater там нет, обновление .apk только вручную по этой же
+           ссылке. Открываем через tg.openLink, если игра запущена внутри
+           Telegram Web App, иначе обычным window.open — см. openAppLink()
+           в JS. -->
       <div class="section-label">Приложения</div>
       <div class="list-group" style="margin-bottom:12px;">
-        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-windows-latest"><div class="t-label">🖥️ Windows (.exe)</div></div>
-        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-linux-latest"><div class="t-label">🐧 Linux (AppImage / .deb / .tar.gz)</div></div>
+        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/latest"><div class="t-label">🖥️ Desktop (Windows .exe / Linux AppImage-.deb-.tar.gz)</div></div>
         <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/android-latest"><div class="t-label">📱 Android (.apk)</div></div>
         <div class="plain-row" data-app-link="https://botsystemtioxsit.github.io/index.html/"><div class="t-label">🌐 Открыть на сайте</div></div>
       </div>
@@ -5593,26 +5601,27 @@ sudo apt-get install -y libnss3 libnspr4 libatk-bridge2.0-0 libatk1.0-0 libgtk-3
 # если apt ругается на libasound2 (переименован на новых Debian/Ubuntu):
 sudo apt-get install -y libasound2t64</code></pre>
         <div style="font-size:13px; font-weight:600; margin-bottom:4px;">AppImage</div>
-        <div class="t-desc" style="margin-bottom:8px; line-height:1.4;">Тоже без установки, но нужен FUSE — если не хватает, поставится одной командой.</div>
-        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0 0 14px; color:var(--text);"><code>chmod +x "Тролль-Баттл-1.0.0.AppImage"
-./"Тролль-Баттл-1.0.0.AppImage"
+        <div class="t-desc" style="margin-bottom:8px; line-height:1.4;">Тоже без установки, но нужен FUSE — если не хватает, поставится одной командой. Из трёх форматов только AppImage умеет обновляться сам (autoUpdater поддерживает его на Linux официально).</div>
+        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0 0 14px; color:var(--text);"><code>chmod +x *.AppImage
+./*.AppImage
 # если ругается на FUSE:
 sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></pre>
         <div style="font-size:13px; font-weight:600; margin-bottom:4px;">.deb (обычная установка)</div>
-        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0; color:var(--text);"><code>sudo dpkg -i troll-battle-desktop_1.0.0_amd64.deb</code></pre>
+        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0; color:var(--text);"><code>sudo dpkg -i troll-battle-desktop_*_amd64.deb</code></pre>
       </div>
 
       <div style="text-align:center; margin-bottom:10px;">
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.45 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.46 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Инструкция по установке .tar.gz/AppImage дополнена командой на случай ошибки «error while loading shared libraries: libnss3.so...» — .tar.gz не носит с собой системные библиотеки Chromium, их нужно доставить apt-get отдельно (одна команда, см. раздел «Приложения» в Настройках).</span>
+        <span style="font-size:11px;">Windows/Linux desktop-приложение теперь умеет обновляться само (electron-updater): Windows и Linux (AppImage) публикуются в общий версионный релиз GitHub, приложение тихо проверяет и ставит новую версию при перезапуске — без похода за файлом вручную. Кнопка «Приложения» ведёт на releases/latest вместо фиксированного тега.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.45 — Инструкция по установке .tar.gz/AppImage дополнена командой на случай ошибки «error while loading shared libraries: libnss3.so...» — .tar.gz не носит с собой системные библиотеки Chromium, их нужно доставить apt-get отдельно (одна команда, см. раздел «Приложения» в Настройках)<br>
           v0.4.44 — В разделе «Приложения» добавлена раскрывающаяся инструкция по установке Linux-сборки прямо в игре (команды для .tar.gz/AppImage/.deb), включая предупреждение про ChromeOS: «Загрузки» ChromeOS и ~/Downloads внутри Linux (Crostini) — разные папки, файл нужно сначала расшарить через «Файлы → Copy to Linux»<br>
           v0.4.43 — Linux-сборка десктоп-приложения теперь также публикуется как .tar.gz (без установки, не зависит от dpkg/FUSE) — часть свежих образов ChromeOS Crostini больше не ставит .deb. AppImage/.deb остаются, .tar.gz — самый надёжный запасной вариант<br>
           v0.4.42 — Починен вход по email/username/номеру — единое поле входа с v0.4.39 сначала безусловно проверяло ввод как токен доступа, а Firebase не пускает "." в пути; из-за этого ЛЮБОЙ email (в нём почти всегда есть точка в домене) валился с ошибкой прямо на этом шаге, вместо того чтобы дойти до правильной проверки<br>

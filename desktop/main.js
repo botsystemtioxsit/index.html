@@ -5,6 +5,7 @@
 // пересборки и переустановки десктоп-приложения — то же самое, что уже
 // происходит в браузере у всех остальных.
 const { app, BrowserWindow, shell, session } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 // URL, который видно в адресной строке браузера при открытии не из Telegram
@@ -55,6 +56,20 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+
+  // Автообновление — только для самой обёртки (Electron-версия, иконка,
+  // разрешения и т.п.), а не для содержимого игры: то обновляется само,
+  // просто перезагрузкой живой страницы, без переустановки. Обёртка
+  // меняется редко, но раз меняется — пусть само доставит новую версию.
+  // Работает только в собранном (упакованном) приложении — в dev-режиме
+  // (npm start) молча ничего не делает. Тихая проверка + тихая скачка +
+  // установка при следующем запуске — checkForUpdatesAndNotify делает всё
+  // это сама, без своего UI внутри окна.
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      console.error('Автообновление: проверка не удалась', err);
+    });
+  }
 });
 
 app.on('window-all-closed', () => {
