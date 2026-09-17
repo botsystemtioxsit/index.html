@@ -5555,17 +5555,36 @@
         <div class="t-desc" style="margin-top:8px; line-height:1.4;">На другом устройстве/браузере впиши этот же email в «Войти в свой аккаунт» — заявку на вход подтвердишь прямо здесь, в Сообщество → Запросы, без пароля и без письма.</div>
       </div>
 
+      <!-- ===== "Приложения" — ссылки на все способы открыть эту же игру,
+           чтобы не логиниться заново на каждом устройстве: открыл бота в
+           Телеграме → сразу отсюда скачал нужный файл. Все три сборки
+           (.exe/.apk/AppImage+.deb) собираются автоматически в CI при
+           каждом изменении desktop/ или android/ (см. build-windows-
+           installer.yml, build-android-apk.yml, build-linux-installer.yml
+           в .github/workflows/) и публикуются под ФИКСИРОВАННЫМИ тегами
+           релиза (…-latest) — ссылки ниже не протухают между сборками.
+           Открываем через tg.openLink, если игра запущена внутри Telegram
+           Web App, иначе обычным window.open — см. openAppLink() в JS. -->
+      <div class="section-label">Приложения</div>
+      <div class="list-group" style="margin-bottom:16px;">
+        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-windows-latest"><div class="t-label">🖥️ Windows (.exe)</div></div>
+        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-linux-latest"><div class="t-label">🐧 Linux (AppImage / .deb)</div></div>
+        <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/android-latest"><div class="t-label">📱 Android (.apk)</div></div>
+        <div class="plain-row" data-app-link="https://botsystemtioxsit.github.io/index.html/"><div class="t-label">🌐 Открыть на сайте</div></div>
+      </div>
+
       <div style="text-align:center; margin-bottom:10px;">
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.40 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 16.09.2026<br>
-        <span style="font-size:11px;">Аварийный режим и режим обслуживания теперь закрывают доступ мгновенно на уже открытых вкладках (живой слушатель вместо проверки только при заходе) — и аварийный режим блокирует вообще всех, без исключения даже для супердоступа.</span>
+        <div class="v-num">MICBATTLE v0.4.41 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 17.09.2026<br>
+        <span style="font-size:11px;">Настройки → добавлен раздел "Приложения" — ссылки на Windows/Linux/Android-сборки игры и на сайт, чтобы не логиниться заново на каждом устройстве.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.40 — Аварийный режим и режим обслуживания теперь закрывают доступ мгновенно на уже открытых вкладках (живой слушатель вместо проверки только при заходе) — и аварийный режим блокирует вообще всех, без исключения даже для супердоступа<br>
           v0.4.39 — единое поле входа теперь также принимает токен доступа — отдельный, ни к какому игроку не привязанный ключ, который создаётся и настраивается в панели администрации и логинит сразу, без подтверждения<br>
           v0.4.38 — (откачено) добавлялся код входа от администрации, привязанный к конкретному игроку — заменён на отдельный, ни к чему не привязанный токен доступа<br>
           v0.4.37 — Firebase App Check активирован (реальный ключ reCAPTCHA), пока в режиме мониторинга — видно в консоли Firebase, кто ходит в базу мимо приложения<br>
@@ -5797,6 +5816,18 @@
   });
   document.getElementById('settings-close-btn').addEventListener('click', () => settingsOverlay.classList.remove('open'));
   settingsOverlay.addEventListener('click', (e) => { if(e.target === settingsOverlay) settingsOverlay.classList.remove('open'); });
+
+  // ===== "Приложения" — см. комментарий у карточки в HTML. Читаем
+  // window.Telegram напрямую (а не через какую-то общую переменную), чтобы
+  // не зависеть от порядка выполнения соседних <script>-блоков. =====
+  function openAppLink(url) {
+    const tgApp = window.Telegram?.WebApp;
+    if (tgApp && typeof tgApp.openLink === 'function') tgApp.openLink(url);
+    else window.open(url, '_blank');
+  }
+  document.querySelectorAll('[data-app-link]').forEach((row) => {
+    row.addEventListener('click', () => openAppLink(row.dataset.appLink));
+  });
 
   // ===== desktop-сайдбар: пункты навигации просто "кликают" настоящие
   // action-row по id, никакой отдельной логики открытия/закрытия —
@@ -7908,6 +7939,8 @@
       "Начало баттла": "Battle start",
       "Когда найден соперник": "When an opponent is found",
       "Приглашения от друзей": "Friend invites",
+      "Приложения": "Apps",
+      "🌐 Открыть на сайте": "🌐 Open in browser",
       "Аккаунт": "Account",
       "Telegram-аккаунт": "Telegram account",
       "Способ входа": "Login method",
@@ -8026,6 +8059,8 @@
       "Начало баттла": "Kampfbeginn",
       "Когда найден соперник": "Wenn ein Gegner gefunden wurde",
       "Приглашения от друзей": "Einladungen von Freunden",
+      "Приложения": "Apps",
+      "🌐 Открыть на сайте": "🌐 Im Browser öffnen",
       "Аккаунт": "Konto",
       "Telegram-аккаунт": "Telegram-Konto",
       "Способ входа": "Anmeldemethode",

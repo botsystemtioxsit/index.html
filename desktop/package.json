@@ -1,0 +1,44 @@
+{
+  "name": "troll-battle-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Десктоп-приложение (Electron) для игры «Тролль-Баттл» — окно, которое открывает живую игру без браузера.",
+  "author": {
+    "name": "botsystemtioxsit",
+    "email": "botsystemtioxsit@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/botsystemtioxsit/index.html",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.tioxsit.trollbattle",
+    "productName": "Тролль-Баттл",
+    "publish": null,
+    "files": [
+      "main.js",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game",
+      "icon": "icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "icon.png"
+    }
+  }
+}

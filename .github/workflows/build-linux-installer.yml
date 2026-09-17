@@ -1,0 +1,47 @@
+name: Build Linux installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-linux-installer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install desktop app dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build AppImage + .deb (native Linux, no wine needed)
+        working-directory: desktop
+        run: npm run build:linux
+
+      - name: Read version
+        id: ver
+        run: echo "version=$(node -p "require('./desktop/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release with installer attached
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-linux-latest
+          name: Тролль-Баттл (Linux) — последняя сборка
+          files: |
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+          body: |
+            Версия ${{ steps.ver.outputs.version }}, сборка ${{ github.run_number }}, из коммита ${{ github.sha }}.
+            AppImage запускается без установки (`chmod +x *.AppImage && ./Тролль*.AppImage`), .deb — обычным `sudo dpkg -i *.deb`.
+            Этот релиз всегда переиспользуется под фиксированным тегом `desktop-linux-latest` — ссылка на него не меняется между сборками.
