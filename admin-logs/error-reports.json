@@ -1,1 +1,86 @@
-null
+{
+  "-P1gjXtbitY-rh2YBYQm" : {
+    "createdAt" : 1789604539994,
+    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "telegramId" : "guest_49zb9om",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
+  },
+  "-P1gm50COQqHUO9zg07x" : {
+    "createdAt" : 1789605207529,
+    "firstName" : "Гость",
+    "log" : "[02:33:22] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "playerId" : "PLR-ZGA9XJ",
+    "telegramId" : "guest_4bi6wk6",
+    "userAgent" : "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+  },
+  "-P1gnkB1r3Izpl-8n3lN" : {
+    "createdAt" : 1789605643004,
+    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"\n[02:40:30] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "telegramId" : "guest_49zb9om",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
+  },
+  "-P1gq_Te48Cz_013_mkJ" : {
+    "createdAt" : 1789606385561,
+    "firstName" : "TIOXSIT",
+    "log" : "[02:53:04] Голос (LiveKit): токен получен, identity=host-6W6YR-edamhm, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[02:53:04] Голос (LiveKit): состояние: connecting\n[02:53:04] Голос (LiveKit): состояние: connected\n[02:53:05] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
+  },
+  "-P1gqbjrkR9H8noXTKa9" : {
+    "createdAt" : 1789606394854,
+    "firstName" : "TIOXSIT",
+    "log" : "[02:53:04] Голос (LiveKit): токен получен, identity=host-6W6YR-edamhm, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[02:53:04] Голос (LiveKit): состояние: connecting\n[02:53:04] Голос (LiveKit): состояние: connected\n[02:53:05] Голос (LiveKit): подключено и микрофон включён\n[02:53:13] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
+  },
+  "-P1hUXoe_79L3CD8vQIM" : {
+    "createdAt" : 1789617122560,
+    "firstName" : "прекрасен как индус",
+    "log" : "[05:52:01] Приглашение: battles/EYWBK недоступна: нет записи",
+    "playerId" : "PLR-8M6569",
+    "telegramId" : "7881642231",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.87 Mobile Safari/537.36 Telegram-Android/12.10.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P1hUg-l_WyJNRxWULK9" : {
+    "createdAt" : 1789617160199,
+    "firstName" : "прекрасен как индус",
+    "log" : "[05:52:01] Приглашение: battles/EYWBK недоступна: нет записи\n[05:52:39] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.",
+    "playerId" : "PLR-8M6569",
+    "telegramId" : "7881642231",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.87 Mobile Safari/537.36 Telegram-Android/12.10.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P1hUt1Vq58xClsdkuGN" : {
+    "createdAt" : 1789617213693,
+    "firstName" : "TIOXSIT",
+    "log" : "[05:52:50] Голос (LiveKit): токен получен, identity=host-UM7GG-4mvv32, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[05:52:50] Голос (LiveKit): состояние: connecting\n[05:52:51] Голос (LiveKit): состояние: connected\n[05:52:51] Голос (LiveKit): подключено и микрофон включён\n[05:52:53] Голос (LiveKit): получили аудио-трек: augmentative-packet",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) troll-battle-desktop/1.0.0 Chrome/130.0.6723.191 Electron/33.4.11 Safari/537.36"
+  },
+  "-P1hV2gkonN6HJvQcImt" : {
+    "createdAt" : 1789617257222,
+    "firstName" : "прекрасен как индус",
+    "log" : "[05:52:01] Приглашение: battles/EYWBK недоступна: нет записи\n[05:52:39] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.\n[05:52:50] Голос (LiveKit): токен получен, identity=guest-UM7GG-q8wk9c, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[05:52:50] Голос (LiveKit): состояние: connecting\n[05:52:50] Голос (LiveKit): состояние: connected\n[05:52:51] Голос (LiveKit): получили аудио-трек: innovative-cluster\n[05:52:52] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-8M6569",
+    "telegramId" : "7881642231",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.87 Mobile Safari/537.36 Telegram-Android/12.10.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P1hV44De3pakvUHRrOH" : {
+    "createdAt" : 1789617262883,
+    "firstName" : "прекрасен как индус",
+    "log" : "[05:52:01] Приглашение: battles/EYWBK недоступна: нет записи\n[05:52:39] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.\n[05:52:50] Голос (LiveKit): токен получен, identity=guest-UM7GG-q8wk9c, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[05:52:50] Голос (LiveKit): состояние: connecting\n[05:52:50] Голос (LiveKit): состояние: connected\n[05:52:51] Голос (LiveKit): получили аудио-трек: innovative-cluster\n[05:52:52] Голос (LiveKit): подключено и микрофон включён\n[05:54:21] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-8M6569",
+    "telegramId" : "7881642231",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.87 Mobile Safari/537.36 Telegram-Android/12.10.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P1hWwV_J3mTNnZ0hSAJ" : {
+    "createdAt" : 1789617751293,
+    "firstName" : "Гость",
+    "log" : "[06:02:17] Голос (LiveKit): токен получен, identity=host-FFK4W-d1962e, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[06:02:17] Голос (LiveKit): состояние: connecting\n[06:02:18] Голос (LiveKit): состояние: connected\n[06:02:18] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-J9QPKY",
+    "telegramId" : "guest_atcn437",
+    "userAgent" : "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+  }
+}
