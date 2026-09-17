@@ -5566,24 +5566,49 @@
            Открываем через tg.openLink, если игра запущена внутри Telegram
            Web App, иначе обычным window.open — см. openAppLink() в JS. -->
       <div class="section-label">Приложения</div>
-      <div class="list-group" style="margin-bottom:16px;">
+      <div class="list-group" style="margin-bottom:12px;">
         <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-windows-latest"><div class="t-label">🖥️ Windows (.exe)</div></div>
         <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-linux-latest"><div class="t-label">🐧 Linux (AppImage / .deb / .tar.gz)</div></div>
         <div class="plain-row" data-app-link="https://github.com/botsystemtioxsit/index.html/releases/tag/android-latest"><div class="t-label">📱 Android (.apk)</div></div>
         <div class="plain-row" data-app-link="https://botsystemtioxsit.github.io/index.html/"><div class="t-label">🌐 Открыть на сайте</div></div>
       </div>
 
+      <!-- ===== инструкция по установке Linux-сборки прямо в игре — не
+           только в README/тексте релиза на GitHub. .tar.gz — приоритет,
+           т.к. часть свежих образов ChromeOS Crostini больше не ставит
+           .deb; AppImage не ставит ничего в систему, но требует FUSE. -->
+      <div style="text-align:center; margin-bottom:10px;">
+        <button id="btn-linux-install-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Как установить Linux-версию (в т.ч. ChromeOS)</button>
+      </div>
+      <div id="linux-install-info" style="display:none; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; margin:0 0 16px;">
+        <div style="font-size:13px; font-weight:600; margin-bottom:4px;">.tar.gz — самый надёжный вариант</div>
+        <div class="t-desc" style="margin-bottom:8px; line-height:1.4;">Ничего не ставит в систему — просто распаковка и запуск. Работает даже там, где .deb уже не ставится (часть свежих образов ChromeOS).</div>
+        <div class="t-desc" style="margin-bottom:8px; line-height:1.4; color:var(--live);">На ChromeOS браузер скачивает файл в «Загрузки» самого ChromeOS — это НЕ то же самое, что ~/Downloads внутри Linux (Crostini), и по умолчанию Linux эту папку не видит. Если tar пишет «No such file or directory»: открой приложение «Файлы» → «Загрузки» → правый клик по файлу → «Copy to Linux» (или проверь ls /mnt/chromeos/MyFiles/Downloads/*.tar.gz).</div>
+        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0 0 14px; color:var(--text);"><code>tar -xzf troll-battle-desktop-*.tar.gz
+cd troll-battle-desktop-*/
+./troll-battle-desktop</code></pre>
+        <div style="font-size:13px; font-weight:600; margin-bottom:4px;">AppImage</div>
+        <div class="t-desc" style="margin-bottom:8px; line-height:1.4;">Тоже без установки, но нужен FUSE — если не хватает, поставится одной командой.</div>
+        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0 0 14px; color:var(--text);"><code>chmod +x "Тролль-Баттл-1.0.0.AppImage"
+./"Тролль-Баттл-1.0.0.AppImage"
+# если ругается на FUSE:
+sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></pre>
+        <div style="font-size:13px; font-weight:600; margin-bottom:4px;">.deb (обычная установка)</div>
+        <pre style="background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12px; overflow-x:auto; margin:0; color:var(--text);"><code>sudo dpkg -i troll-battle-desktop_1.0.0_amd64.deb</code></pre>
+      </div>
+
       <div style="text-align:center; margin-bottom:10px;">
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.43 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.44 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Linux-сборка десктоп-приложения теперь также публикуется как .tar.gz (без установки, не зависит от dpkg/FUSE) — часть свежих образов ChromeOS Crostini больше не ставит .deb. AppImage/.deb остаются, .tar.gz — самый надёжный запасной вариант.</span>
+        <span style="font-size:11px;">В разделе «Приложения» добавлена раскрывающаяся инструкция по установке Linux-сборки прямо в игре (команды для .tar.gz/AppImage/.deb), включая предупреждение про ChromeOS: «Загрузки» ChromeOS и ~/Downloads внутри Linux (Crostini) — разные папки, файл нужно сначала расшарить через «Файлы → Copy to Linux».</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.43 — Linux-сборка десктоп-приложения теперь также публикуется как .tar.gz (без установки, не зависит от dpkg/FUSE) — часть свежих образов ChromeOS Crostini больше не ставит .deb. AppImage/.deb остаются, .tar.gz — самый надёжный запасной вариант<br>
           v0.4.42 — Починен вход по email/username/номеру — единое поле входа с v0.4.39 сначала безусловно проверяло ввод как токен доступа, а Firebase не пускает "." в пути; из-за этого ЛЮБОЙ email (в нём почти всегда есть точка в домене) валился с ошибкой прямо на этом шаге, вместо того чтобы дойти до правильной проверки<br>
           v0.4.41 — Настройки → добавлен раздел "Приложения" — ссылки на Windows/Linux/Android-сборки игры и на сайт, чтобы не логиниться заново на каждом устройстве<br>
           v0.4.40 — Аварийный режим и режим обслуживания теперь закрывают доступ мгновенно на уже открытых вкладках (живой слушатель вместо проверки только при заходе) — и аварийный режим блокирует вообще всех, без исключения даже для супердоступа<br>
@@ -5739,6 +5764,10 @@
   const settingsOverlay = document.getElementById('settings-overlay');
   document.getElementById('btn-history-toggle')?.addEventListener('click', () => {
     const el = document.getElementById('version-history-full');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('btn-linux-install-toggle')?.addEventListener('click', () => {
+    const el = document.getElementById('linux-install-info');
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
   });
   // ===== смена никнейма — с одобрением модератора, как ссылка на чат
