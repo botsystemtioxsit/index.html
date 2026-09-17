@@ -5684,13 +5684,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.47 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.48 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Починена редкая гонка в рейтинговом мэтчмейкинге: матч мог создаться с уже отключившимся "призраком" в очереди, и тогда голос не подключался никогда, без вариантов выйти кроме крестика. Теперь перед матчем дополнительно проверяется presence соперника, а если "призрак" всё же проскочил — через 45с без второго участника в комнате появляется кнопка "Соперник не подключился — выйти".</span>
+        <span style="font-size:11px;">Новая иконка приложения (звезда) — desktop (Windows/Linux) и Android. Версия обёртки поднята до 1.0.2, подтянется автоматически через electron-updater.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.47 — Починена редкая гонка в рейтинговом мэтчмейкинге: матч мог создаться с уже отключившимся "призраком" в очереди, и тогда голос не подключался никогда, без вариантов выйти кроме крестика. Теперь перед матчем дополнительно проверяется presence соперника, а если "призрак" всё же проскочил — через 45с без второго участника в комнате появляется кнопка "Соперник не подключился — выйти"<br>
           v0.4.46 — Windows/Linux desktop-приложение теперь умеет обновляться само (electron-updater): Windows и Linux (AppImage) публикуются в общий версионный релиз GitHub, приложение тихо проверяет и ставит новую версию при перезапуске — без похода за файлом вручную. Кнопка «Приложения» ведёт на releases/latest вместо фиксированного тега<br>
           v0.4.45 — Инструкция по установке .tar.gz/AppImage дополнена командой на случай ошибки «error while loading shared libraries: libnss3.so...» — .tar.gz не носит с собой системные библиотеки Chromium, их нужно доставить apt-get отдельно (одна команда, см. раздел «Приложения» в Настройках)<br>
           v0.4.44 — В разделе «Приложения» добавлена раскрывающаяся инструкция по установке Linux-сборки прямо в игре (команды для .tar.gz/AppImage/.deb), включая предупреждение про ChromeOS: «Загрузки» ChromeOS и ~/Downloads внутри Linux (Crostini) — разные папки, файл нужно сначала расшарить через «Файлы → Copy to Linux»<br>
