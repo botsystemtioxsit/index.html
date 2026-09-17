@@ -5,7 +5,7 @@
     "users": {
       "$uid": {
         "role": {
-          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || ((newData.val() === 'admin' || newData.val() === 'superadmin') && newData.parent().child('roleGrantKey').val() === '37c08170dc698a0ab5d6805d79bd3c344a12ec0a9020510b5f29f60ace1af94f')"
+          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || ((newData.val() === 'admin' || newData.val() === 'superadmin') && newData.parent().child('roleGrantKey').val() === '__ROLE_GRANT_KEY__')"
         },
         "roleGrantKey": {
           ".validate": "!newData.exists() || newData.isString()"
