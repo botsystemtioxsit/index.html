@@ -43,6 +43,58 @@ cd desktop
 (Crostini) он сам появляется в общем лаунчере среди Linux-приложений; на
 Debian/Ubuntu с рабочим столом — в обычном меню приложений.
 
+## Способы установки на Linux / ChromeOS (Crostini)
+
+Готовые файлы всех трёх форматов ниже собираются автоматически в CI при
+каждом изменении `desktop/` и публикуются одним и тем же релизом —
+**[desktop-linux-latest](https://github.com/botsystemtioxsit/index.html/releases/tag/desktop-linux-latest)**
+(ссылка не меняется между сборками, всегда актуальная версия). На части
+свежих образов ChromeOS Crostini `.deb`-пакеты через `dpkg` ставить больше
+нельзя — тогда используйте AppImage или `.tar.gz` ниже, оба не зависят от
+пакетного менеджера контейнера вообще.
+
+1. **`.tar.gz` — самый надёжный вариант, если остальное не заводится.**
+   Не ставит ничего в систему, просто распаковывается в папку:
+   ```bash
+   tar -xzf troll-battle-desktop-*.tar.gz
+   cd troll-battle-desktop-*/
+   ./troll-battle-desktop
+   ```
+   Чтобы получить ярлык в меню приложений из этой же папки — тот же
+   `install-launcher.sh`, что и ниже, только вместо `troll-battle-gui.sh`
+   в нём нужно указать путь до `troll-battle-desktop` (одна строка
+   `Exec=` в `~/.local/share/applications/troll-battle.desktop`).
+
+2. **AppImage — тоже без установки, но нужен FUSE.**
+   ```bash
+   chmod +x "Тролль-Баттл-1.0.0.AppImage"
+   ./"Тролль-Баттл-1.0.0.AppImage"
+   ```
+   Если ругается на отсутствие FUSE (частая ситуация в свежих Debian/
+   Crostini, где `libfuse2` больше не ставится по умолчанию):
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64
+   ```
+
+3. **`.deb` — обычная установка через пакетный менеджер, если он ещё
+   поддерживается на вашем образе ChromeOS:**
+   ```bash
+   sudo dpkg -i troll-battle-desktop_1.0.0_amd64.deb
+   ```
+
+4. **Собрать/запустить из исходников — универсальный запасной вариант,
+   если ни один из готовых файлов выше не подходит.** Требует `git` и
+   `node`/`npm` (в Crostini обычно уже есть или ставится одной командой
+   `sudo apt-get install -y git nodejs npm`):
+   ```bash
+   git clone https://github.com/botsystemtioxsit/index.html.git
+   cd index.html/desktop
+   ./troll-battle-gui.sh
+   ```
+   Именно так собран блок «Запуск одной командой» выше — `troll-battle-gui.sh`
+   сам доставит недостающие системные библиотеки Chromium и Electron.
+
 ## Собрать установочный файл
 
 Собирается через GitHub Actions (Windows/Linux CI-раннеры, ничего ставить
@@ -57,7 +109,7 @@ Debian/Ubuntu с рабочим столом — в обычном меню пр
 ```bash
 npm install
 npm run build:win     # .exe (нужен wine, см. .github/workflows/build-windows-installer.yml)
-npm run build:linux   # AppImage + .deb, нативно на Linux
+npm run build:linux   # AppImage + .deb + .tar.gz, нативно на Linux
 ```
 
 ## Свой значок приложения
