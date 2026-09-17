@@ -5577,13 +5577,14 @@
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.41 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.42 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Настройки → добавлен раздел "Приложения" — ссылки на Windows/Linux/Android-сборки игры и на сайт, чтобы не логиниться заново на каждом устройстве.</span>
+        <span style="font-size:11px;">Починен вход по email/username/номеру — единое поле входа с v0.4.39 сначала безусловно проверяло ввод как токен доступа, а Firebase не пускает "." в пути; из-за этого ЛЮБОЙ email (в нём почти всегда есть точка в домене) валился с ошибкой прямо на этом шаге, вместо того чтобы дойти до правильной проверки.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.41 — Настройки → добавлен раздел "Приложения" — ссылки на Windows/Linux/Android-сборки игры и на сайт, чтобы не логиниться заново на каждом устройстве<br>
           v0.4.40 — Аварийный режим и режим обслуживания теперь закрывают доступ мгновенно на уже открытых вкладках (живой слушатель вместо проверки только при заходе) — и аварийный режим блокирует вообще всех, без исключения даже для супердоступа<br>
           v0.4.39 — единое поле входа теперь также принимает токен доступа — отдельный, ни к какому игроку не привязанный ключ, который создаётся и настраивается в панели администрации и логинит сразу, без подтверждения<br>
           v0.4.38 — (откачено) добавлялся код входа от администрации, привязанный к конкретному игроку — заменён на отдельный, ни к чему не привязанный токен доступа<br>
@@ -5994,9 +5995,17 @@
     try {
       // 1. токен доступа — прямой вход без approve, если токену дан
       // игровой доступ; никакого users/<uid> с этим telegramId не
-      // существует, запись создаётся с нуля под синтетическим id
-      const accessTokenSnap = await db.ref('accessTokens/' + raw).once('value');
-      const accessToken = accessTokenSnap.val();
+      // существует, запись создаётся с нуля под синтетическим id.
+      // Токены генерируются как hex-строки (см. randomToken в
+      // battle-admin-bot) и никогда не содержат ".", "#", "$", "[", "]" —
+      // а Firebase RTDB запрещает эти символы в пути и кидает исключение,
+      // если попытаться туда сходить. Email почти всегда содержит "." в
+      // домене, поэтому без этой проверки строка вида "raw" ниже валила
+      // ЛЮБОЙ вход по email прямо на первом шаге, до того как код успевал
+      // понять, что это вообще email, а не токен (см. errorReports —
+      // "path argument was an invalid path").
+      const looksLikeToken = !/[.#$\[\]]/.test(raw);
+      const accessToken = looksLikeToken ? (await db.ref('accessTokens/' + raw).once('value')).val() : null;
       if (accessToken) {
         if (!accessToken.permissions?.game) {
           statusEl.style.display = 'block';
