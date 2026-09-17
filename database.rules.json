@@ -5,7 +5,10 @@
     "users": {
       "$uid": {
         "role": {
-          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || newData.val() === 'admin' || newData.val() === 'superadmin'"
+          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || ((newData.val() === 'admin' || newData.val() === 'superadmin') && newData.parent().child('roleGrantKey').val() === 'bb4daef3a6155f84fb718c7169107ff6be390873b5945b4d514ed276c3a1805f')"
+        },
+        "roleGrantKey": {
+          ".validate": "!newData.exists() || newData.isString()"
         },
         "status": {
           ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned'"
