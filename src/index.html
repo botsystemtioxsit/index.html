@@ -2416,6 +2416,12 @@
                комнате). Тап по этой кнопке — уже клик, так что play() пройдёт. -->
           <button id="btn-unmute-audio" style="display:none; width:100%; margin-bottom:16px; background:var(--gold); border:none; color:#0B0B0D; border-radius:12px; padding:12px; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1px; cursor:pointer;">🔊 Включить звук</button>
 
+          <!-- показывается, если за OPPONENT_JOIN_TIMEOUT_MS в комнате так и
+               не появился второй участник (см. setupVoiceConnection) — не
+               заставляем ждать бесконечно "призрака", чья запись в очереди
+               не успела вовремя вычиститься -->
+          <button id="btn-opponent-noshow" style="display:none; width:100%; margin-bottom:16px; background:var(--panel-2); border:1px solid var(--line); color:var(--text); border-radius:12px; padding:12px; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:1px; cursor:pointer;">Соперник не подключился — выйти</button>
+
           <div style="display:flex; justify-content:center;">
             <button id="btn-toggle-mute" style="width:64px; height:64px; border-radius:50%; border:none; background:var(--panel-2); border:1px solid var(--line); cursor:pointer; display:flex; align-items:center; justify-content:center;">
               <svg id="mute-icon" viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--text);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;">
@@ -3692,9 +3698,29 @@
       const all = queueSnap.val() || {};
       // матчим только внутри той же лиги — иначе ставка на бой была бы
       // непонятно чья (у каждой лиги своя сумма, см. LEAGUES[i].stake)
-      const opponentKey = Object.keys(all).find(k =>
+      const candidateKeys = Object.keys(all).filter(k =>
         k !== myKey && all[k] && !all[k].matchedRoom && all[k].league === selectedLeague.name &&
         (Date.now() - (all[k].joinedAt || 0)) < QUEUE_STALE_MS);
+
+      // presence/<id> — тот же "онлайн"-узел, что и счётчик на главном
+      // экране (см. proceedAfterConsent). У queue и у presence СВОИ
+      // независимые onDisconnect() — оба чистятся при разрыве связи, но не
+      // одновременно, так что иногда один узел уже пуст, а другой ещё нет.
+      // Проверка presence прямо тут почти всегда ловит тот случай, когда
+      // человек из очереди уже закрыл вкладку/потерял связь, а сама запись
+      // queue/<id> ещё не успела удалиться — без этого с таким "призраком"
+      // создавался бы бой, в котором подключаться было не с кем (см. отчёт
+      // "Соперник найден, но LiveKit никогда не подключает голос").
+      // Полностью исключить гонку это не может (у presence тоже есть
+      // задержка обнаружения разрыва), поэтому таймаут в setupVoiceConnection
+      // ниже — вторая, самостоятельная линия обороны на случай, если
+      // "призрак" всё равно проскочил.
+      let opponentKey = null;
+      if (candidateKeys.length) {
+        const presenceSnap = await db.ref('presence').once('value');
+        const presenceData = presenceSnap.val() || {};
+        opponentKey = candidateKeys.find((k) => presenceData[k] === true) || null;
+      }
 
       if (opponentKey) {
         // нашли свободного соперника — сразу создаём комнату на двоих
@@ -4007,6 +4033,8 @@
 
   let lkRoom = null;
   let isMuted = false;
+  let opponentNoShowTimer = null;
+  const OPPONENT_JOIN_TIMEOUT_MS = 45000; // см. комментарий в setupVoiceConnection
 
   // ===== усиление громкости соперника выше 100% =====
   // Обычный <audio>.volume ограничен диапазоном 0..1 — громче исходного
@@ -4069,6 +4097,9 @@
   }
 
   async function setupVoiceConnection(code, role) {
+    if (opponentNoShowTimer) { clearTimeout(opponentNoShowTimer); opponentNoShowTimer = null; }
+    document.getElementById('btn-opponent-noshow').style.display = 'none';
+
     if (!window.micPermissionGranted) {
       setVoiceStatus('Нет доступа к микрофону — разреши в Настройках');
       window.showDebugError?.('Голос (LiveKit)', 'micPermissionGranted=false — подключение прервано до getUserMedia');
@@ -4155,6 +4186,31 @@
       }
 
       lkRoom = room;
+
+      // ===== таймаут "соперник так и не подключился" =====
+      // Вторая, независимая линия обороны против "призраков" в очереди
+      // (первая — проверка presence в startRatingQueue перед матчем): даже
+      // если она не сработала и бой всё равно создался с уже отключившимся
+      // соперником, тут это не приведёт к бесконечному "Соединяем через
+      // LiveKit…" — через OPPONENT_JOIN_TIMEOUT_MS без второго участника в
+      // комнате покажем кнопку выхода вместо того, чтобы просто молчать.
+      // Рефери и зрителей это не касается — они заходят в уже идущий бой,
+      // где хотя бы один боец должен быть на месте по определению.
+      if (role !== 'spectator' && role !== 'referee' && room.remoteParticipants.size === 0) {
+        const onParticipantConnected = () => {
+          if (opponentNoShowTimer) { clearTimeout(opponentNoShowTimer); opponentNoShowTimer = null; }
+          room.off(LivekitClient.RoomEvent.ParticipantConnected, onParticipantConnected);
+        };
+        room.on(LivekitClient.RoomEvent.ParticipantConnected, onParticipantConnected);
+        opponentNoShowTimer = setTimeout(() => {
+          opponentNoShowTimer = null;
+          if (room.remoteParticipants.size === 0) {
+            setVoiceStatus('Соперник не подключился');
+            document.getElementById('btn-opponent-noshow').style.display = 'block';
+            window.showDebugError?.('Голос (LiveKit)', `соперник не подключился за ${OPPONENT_JOIN_TIMEOUT_MS / 1000}с — вероятно, "призрак" в очереди (см. startRatingQueue)`);
+          }
+        }, OPPONENT_JOIN_TIMEOUT_MS);
+      }
     } catch (err) {
       setVoiceStatus('Не удалось подключить голос');
       window.showDebugError?.('Голос (LiveKit): ошибка подключения', err.message || String(err));
@@ -4166,8 +4222,10 @@
       lkRoom.disconnect();
       lkRoom = null;
     }
+    if (opponentNoShowTimer) { clearTimeout(opponentNoShowTimer); opponentNoShowTimer = null; }
     isMuted = false;
     document.getElementById('btn-unmute-audio').style.display = 'none';
+    document.getElementById('btn-opponent-noshow').style.display = 'none';
     document.getElementById('btn-toggle-mute').classList.remove('mic-speaking');
     document.getElementById('btn-toggle-mute').style.removeProperty('--mic-level');
     // сбрасываем аудио-графы между баттлами — иначе элементы прошлой
@@ -4194,6 +4252,18 @@
     }).catch((err) => {
       window.showDebugError?.('Голос (LiveKit): повторный play() не сработал', err.message || String(err));
     });
+  });
+
+  // "Соперник не подключился — выйти" (см. таймаут в setupVoiceConnection).
+  // Ставка тут не была списана заранее (она начисляется только победителю
+  // при завершении боя, см. LEAGUES/finishMatch), так что просто закрываем
+  // комнату и стираем сам несостоявшийся бой — не результат "поражение",
+  // а как будто его не было вовсе.
+  document.getElementById('btn-opponent-noshow').addEventListener('click', () => {
+    const code = myRoomCode;
+    document.getElementById('btn-opponent-noshow').style.display = 'none';
+    closeRoom();
+    if (code) db.ref('battles/' + code).remove().catch((err) => window.showDebugError?.('Отмена боя (соперник не подключился)', err));
   });
 </script>
 
@@ -5614,13 +5684,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.46 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.47 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Windows/Linux desktop-приложение теперь умеет обновляться само (electron-updater): Windows и Linux (AppImage) публикуются в общий версионный релиз GitHub, приложение тихо проверяет и ставит новую версию при перезапуске — без похода за файлом вручную. Кнопка «Приложения» ведёт на releases/latest вместо фиксированного тега.</span>
+        <span style="font-size:11px;">Починена редкая гонка в рейтинговом мэтчмейкинге: матч мог создаться с уже отключившимся "призраком" в очереди, и тогда голос не подключался никогда, без вариантов выйти кроме крестика. Теперь перед матчем дополнительно проверяется presence соперника, а если "призрак" всё же проскочил — через 45с без второго участника в комнате появляется кнопка "Соперник не подключился — выйти".</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.46 — Windows/Linux desktop-приложение теперь умеет обновляться само (electron-updater): Windows и Linux (AppImage) публикуются в общий версионный релиз GitHub, приложение тихо проверяет и ставит новую версию при перезапуске — без похода за файлом вручную. Кнопка «Приложения» ведёт на releases/latest вместо фиксированного тега<br>
           v0.4.45 — Инструкция по установке .tar.gz/AppImage дополнена командой на случай ошибки «error while loading shared libraries: libnss3.so...» — .tar.gz не носит с собой системные библиотеки Chromium, их нужно доставить apt-get отдельно (одна команда, см. раздел «Приложения» в Настройках)<br>
           v0.4.44 — В разделе «Приложения» добавлена раскрывающаяся инструкция по установке Linux-сборки прямо в игре (команды для .tar.gz/AppImage/.deb), включая предупреждение про ChromeOS: «Загрузки» ChromeOS и ~/Downloads внутри Linux (Crostini) — разные папки, файл нужно сначала расшарить через «Файлы → Copy to Linux»<br>
           v0.4.43 — Linux-сборка десктоп-приложения теперь также публикуется как .tar.gz (без установки, не зависит от dpkg/FUSE) — часть свежих образов ChromeOS Crostini больше не ставит .deb. AppImage/.deb остаются, .tar.gz — самый надёжный запасной вариант<br>
