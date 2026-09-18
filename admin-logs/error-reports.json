@@ -82,5 +82,21 @@
     "playerId" : "PLR-J9QPKY",
     "telegramId" : "guest_atcn437",
     "userAgent" : "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+  },
+  "-P1lsa4WQjCJVlVaanrf" : {
+    "createdAt" : 1789690798396,
+    "firstName" : "TIOXSIT",
+    "log" : "[02:19:54] Anonymous Auth: [auth/admin-restricted-operation] Firebase: This operation is restricted to administrators only. (auth/admin-restricted-operation).",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
+  },
+  "-P1lslK8vsu_CiDPCQEf" : {
+    "createdAt" : 1789690844463,
+    "firstName" : "TIOXSIT",
+    "log" : "[02:20:41] Anonymous Auth: [auth/admin-restricted-operation] Firebase: This operation is restricted to administrators only. (auth/admin-restricted-operation).",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
   }
 }
