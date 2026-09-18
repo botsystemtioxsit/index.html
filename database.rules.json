@@ -79,6 +79,11 @@
       "$code": {
         ".validate": "newData.hasChildren(['hostId'])"
       }
+    },
+    "owners": {
+      "$id": {
+        ".validate": "!data.exists() && newData.isString() && auth != null && newData.val() === auth.uid"
+      }
     }
   }
 }

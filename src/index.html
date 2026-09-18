@@ -5684,13 +5684,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.49 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 17.09.2026<br>
-        <span style="font-size:11px;">Служебное обновление правил доступа к базе данных.</span>
+        <div class="v-num">MICBATTLE v0.4.50 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 18.09.2026<br>
+        <span style="font-size:11px;">Служебное обновление — подготовка к более надёжной защите новых аккаунтов.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.49 — Служебное обновление правил доступа к базе данных<br>
           v0.4.48 — Новая иконка приложения (звезда) — desktop (Windows/Linux) и Android. Версия обёртки поднята до 1.0.2, подтянется автоматически через electron-updater<br>
           v0.4.47 — Починена редкая гонка в рейтинговом мэтчмейкинге: матч мог создаться с уже отключившимся "призраком" в очереди, и тогда голос не подключался никогда, без вариантов выйти кроме крестика. Теперь перед матчем дополнительно проверяется presence соперника, а если "призрак" всё же проскочил — через 45с без второго участника в комнате появляется кнопка "Соперник не подключился — выйти"<br>
           v0.4.46 — Windows/Linux desktop-приложение теперь умеет обновляться само (electron-updater): Windows и Linux (AppImage) публикуются в общий версионный релиз GitHub, приложение тихо проверяет и ставит новую версию при перезапуске — без похода за файлом вручную. Кнопка «Приложения» ведёт на releases/latest вместо фиксированного тега<br>
@@ -6788,6 +6789,7 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 <script>
   const tg = window.Telegram?.WebApp;
@@ -6840,6 +6842,27 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
   }
 
   const db = firebase.database();
+
+  // ===== Anonymous Auth — только для привязки владельца НОВЫХ аккаунтов =====
+  // Не связано с тем, что раньше называлось "Firebase Auth" в этом проекте
+  // (Email Link, убрана из-за суточной квоты) — анонимный вход бесплатный,
+  // без письма, без лимита, работает одинаково в браузере, в desktop-обёртке
+  // и в APK. Даёт owners/<id> настоящую, не подделываемую метку устройства
+  // (auth.uid, подписанную самим Firebase), в отличие от localStorage-строки.
+  //
+  // Задним числом привязать так СУЩЕСТВУЮЩИЕ аккаунты нельзя безопасно —
+  // список всех telegramId и так открыт для чтения (.read: true), поэтому
+  // "первая запись побеждает" для уже существующего аккаунта означает, что
+  // кто угодно может скриптом захватить чужой аккаунт раньше настоящего
+  // хозяина. Для НОВОГО аккаунта это не проблема — на момент создания
+  // угадать заранее его будущий telegramId/guest-id, чтобы подготовить
+  // захват, не из чего. Поэтому владелец пишется только атомарно, в том же
+  // db.ref().update(...), что и само создание аккаунта (см. ниже) — не
+  // отдельным запросом, иначе между "создали" и "привязали" был бы точно
+  // такой же зазор для гонки.
+  const anonAuthReady = firebase.auth().signInAnonymously()
+    .then((cred) => cred.user.uid)
+    .catch((err) => { window.showDebugError?.('Anonymous Auth', err); return null; });
 
   // Генерирует случайный внутренний ID игрока, например "PLR-8X3F9K"
   function generatePlayerId() {
@@ -6905,7 +6928,16 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         restrictedUntil: null,
         createdAt: Date.now()
       };
-      userRef.set(userData);
+      // owners/<id> пишется в ТОЙ ЖЕ атомарной записи, что и сам аккаунт —
+      // см. комментарий у anonAuthReady выше про то, почему только так это
+      // безопасно. Если анонимный вход почему-то не прошёл (offline и т.п.),
+      // всё равно создаём аккаунт без owners — не блокировать вход в игру
+      // из-за диагностической привязки.
+      anonAuthReady.then((authUid) => {
+        const updates = { ['users/' + telegramId]: userData };
+        if (authUid) updates['owners/' + telegramId] = authUid;
+        return db.ref().update(updates);
+      });
     }
 
     // Индекс username → telegramId (usernames/<key>), чтобы вход по
