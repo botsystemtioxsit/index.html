@@ -11,7 +11,10 @@
           ".validate": "!newData.exists() || newData.isString()"
         },
         "status": {
-          ".validate": "!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned'"
+          ".validate": "(!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned') && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+        },
+        "adminActionKey": {
+          ".validate": "!newData.exists() || newData.isString()"
         },
         "points": {
           ".validate": "!newData.exists() || newData.isNumber()"
