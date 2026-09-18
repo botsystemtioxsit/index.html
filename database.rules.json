@@ -17,10 +17,10 @@
           ".validate": "!newData.exists() || newData.isString()"
         },
         "points": {
-          ".validate": "!newData.exists() || newData.isNumber()"
+          ".validate": "(!newData.exists() || newData.isNumber()) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
         },
         "starsBalance": {
-          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+          ".validate": "(!newData.exists() || (newData.isNumber() && newData.val() >= 0)) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
         },
         "firstName": {
           ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"

@@ -3075,6 +3075,16 @@
     if (typeof setupVoiceConnection === 'function') setupVoiceConnection(code, 'spectator');
   }
 
+  // Тот же Worker, что и у role-gateway в battle-admin-bot (общий проект,
+  // общая база) — /finish-match проверяет подпись Telegram судьи и то, что
+  // battle.refereeId реально указывает на него, сам пересчитывает
+  // начисление очков по данным из базы (не доверяя числам от клиента) и
+  // только потом пишет points/starsBalance — это единственное место в игре,
+  // где один клиент (судья) меняет чужие points/starsBalance сразу двум
+  // другим аккаунтам, поэтому именно оно нуждалось в серверной проверке
+  // (см. владельческую привязку выше, Anonymous Auth).
+  const MATCH_GATEWAY_URL = 'https://battle-role-gateway.tioxsit.workers.dev/finish-match';
+
   async function refereeDeclareWinner(winnerSide) {
     if (!myRoomCode || myRoomRole !== 'referee' || decidingWinner) return;
     decidingWinner = true;
@@ -3091,14 +3101,41 @@
       clickedBtn.textContent = 'Записываем…';
     }
     const code = myRoomCode;
+    let winnerId = null, loserId = null, pointsAwarded = {}, trophyMultiplier = 1;
+
+    const initData = window.Telegram?.WebApp?.initData;
+    if (initData) {
+      try {
+        const res = await fetch(MATCH_GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData, matchId: code, winnerSide }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        ({ winnerId, loserId, pointsAwarded, trophyMultiplier } = data);
+      } catch (err) {
+        window.showDebugError?.('Судейство: объявление победителя (gateway)', err);
+        closeRoom();
+        return;
+      }
+      closeRoom();
+      showBattleResult('referee', { winnerId, loserId, pointsAwarded, trophyMultiplier }, window.currentPlayer?.playerId);
+      return;
+    }
+
+    // Без initData (не настоящая Telegram-сессия — desktop/browser/APK) —
+    // прежний прямой путь. Работает как раньше для аккаунтов БЕЗ
+    // owners-записи (все существующие на сегодня); для новых аккаунтов
+    // database.rules.json такую запись отклонит без adminActionKey, тут
+    // его взять неоткуда — то же ограничение, что и у выдачи роли/бана.
     const battleSnap = await db.ref('battles/' + code).once('value');
     const battle = battleSnap.val();
     if (!battle || battle.status === 'finished') { closeRoom(); return; }
-    const winnerId = winnerSide === 'host' ? battle.hostId : battle.guestId;
-    const loserId = winnerSide === 'host' ? battle.guestId : battle.hostId;
+    winnerId = winnerSide === 'host' ? battle.hostId : battle.guestId;
+    loserId = winnerSide === 'host' ? battle.guestId : battle.hostId;
     const likesSnap = await db.ref('battles/' + code + '/audienceLikes').once('value');
     const likes = likesSnap.val() || {};
-    const pointsAwarded = {};
     // рейтинговый бой с выбранной лигой (см. startRatingQueue) — трофеи
     // считаются не через ELO, а фиксированной ставкой этой лиги: победа
     // даёт +stake, поражение забирает -penalty (для большинства лиг они
@@ -3111,7 +3148,7 @@
     // билет не трогает) прямо здесь, при объявлении победителя, а не
     // заранее при постановке в очередь — до этого момента ещё неизвестно,
     // выиграет ли игрок вообще
-    const trophyMultiplier = (league && winnerId) ? await window.consumeMultiplierTicket(winnerId) : 1;
+    trophyMultiplier = (league && winnerId) ? await window.consumeMultiplierTicket(winnerId) : 1;
     if (winnerId && loserId) {
       if (league) {
         pointsAwarded[winnerId] = league.stake * trophyMultiplier;
@@ -5684,13 +5721,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.50 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.51 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 18.09.2026<br>
-        <span style="font-size:11px;">Служебное обновление — подготовка к более надёжной защите новых аккаунтов.</span>
+        <span style="font-size:11px;">Служебное обновление — итог боя теперь дополнительно проверяется на сервере.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.50 — Служебное обновление — подготовка к более надёжной защите новых аккаунтов<br>
           v0.4.49 — Служебное обновление правил доступа к базе данных<br>
           v0.4.48 — Новая иконка приложения (звезда) — desktop (Windows/Linux) и Android. Версия обёртки поднята до 1.0.2, подтянется автоматически через electron-updater<br>
           v0.4.47 — Починена редкая гонка в рейтинговом мэтчмейкинге: матч мог создаться с уже отключившимся "призраком" в очереди, и тогда голос не подключался никогда, без вариантов выйти кроме крестика. Теперь перед матчем дополнительно проверяется presence соперника, а если "призрак" всё же проскочил — через 45с без второго участника в комнате появляется кнопка "Соперник не подключился — выйти"<br>
