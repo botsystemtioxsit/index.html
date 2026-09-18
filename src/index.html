@@ -3309,8 +3309,39 @@
   // другом — обычная transaction() тут ранее давала ложные срабатывания.
   let myQueueRef = null;
   let myQueueListener = null;
+  let myQueueWatchRef = null;
+  let myQueueWatchListener = null;
   let myRefQueueRef = null;
   let myRefQueueListener = null;
+  const QUEUE_STALE_MS = 2 * 60 * 1000; // подстраховка на случай, если onDisconnect не сработал
+
+  // Пытается "застолбить" opponentKey и создать под него комнату — общий
+  // код и для активного сканирования очереди (клик "Искать"), и для живого
+  // наблюдателя за новыми кандидатами (см. ниже в startRatingQueue,
+  // ветка "встали в очередь сами"). Возвращает battleData при успехе,
+  // null если кто-то параллельно успел забрать этого же соперника раньше.
+  async function attemptClaimOpponent(me, opponentKey, opponent) {
+    const code = generateRoomCode();
+    await db.ref('queue/' + opponentKey + '/matchedRoom').set(code);
+    const recheck = (await db.ref('queue/' + opponentKey + '/matchedRoom').once('value')).val();
+    if (recheck !== code) return null; // кто-то параллельно успел его забрать — гонка
+
+    const battleData = {
+      hostId: me.playerId,
+      hostName: me.firstName,
+      guestId: opponent.playerId,
+      guestName: opponent.firstName,
+      status: 'active',
+      rated: true,
+      league: selectedLeague.name,
+      stake: selectedLeague.stake,
+      createdAt: Date.now()
+    };
+    await db.ref('battles/' + code).set(battleData);
+    window.ensureMatchRecord?.(code, battleData);
+    tryAssignWaitingReferee(code); // если кто-то уже ждёт в очереди судейства — не ждём, сразу подключаем
+    return { code, battleData };
+  }
 
   function rqShowError(text) {
     const el = document.getElementById('rq-error');
@@ -3604,6 +3635,7 @@
     warpOverlayEl.classList.remove('open');
     if (demoMatchTimeoutId) { clearTimeout(demoMatchTimeoutId); demoMatchTimeoutId = null; }
     if (myQueueListener) { myQueueRef?.off('value', myQueueListener); myQueueListener = null; }
+    if (myQueueWatchListener) { myQueueWatchRef?.off('child_added', myQueueWatchListener); myQueueWatchListener = null; myQueueWatchRef = null; }
     if (myQueueRef) { myQueueRef.onDisconnect().cancel(); myQueueRef.remove().catch(() => {}); myQueueRef = null; }
     if (myRefQueueListener) { myRefQueueRef?.off('value', myRefQueueListener); myRefQueueListener = null; }
     if (myRefQueueRef) { myRefQueueRef.onDisconnect().cancel(); myRefQueueRef.remove().catch(() => {}); myRefQueueRef = null; }
@@ -3730,7 +3762,6 @@
     }
 
     try {
-      const QUEUE_STALE_MS = 2 * 60 * 1000; // подстраховка на случай, если onDisconnect не сработал
       const queueSnap = await db.ref('queue').once('value');
       const all = queueSnap.val() || {};
       // матчим только внутри той же лиги — иначе ставка на бой была бы
@@ -3761,47 +3792,25 @@
 
       if (opponentKey) {
         // нашли свободного соперника — сразу создаём комнату на двоих
-        const opponent = all[opponentKey];
-        const code = generateRoomCode();
-
-        // сначала "застолбим" соперника, указав ему код комнаты — если кто-то
-        // параллельно успел его забрать, matchedRoom у него будет уже другой
-        await db.ref('queue/' + opponentKey + '/matchedRoom').set(code);
-        const recheck = (await db.ref('queue/' + opponentKey + '/matchedRoom').once('value')).val();
-        if (recheck !== code) {
+        const claim = await attemptClaimOpponent(me, opponentKey, all[opponentKey]);
+        if (!claim) {
           window.showDebugError?.('Рейтинговый бой', `не удалось застолбить соперника ${opponentKey} — гонка, ищем снова`);
           return startRatingQueue(); // кто-то нас опередил — пробуем ещё раз
         }
-
-        const battleData = {
-          hostId: me.playerId,
-          hostName: me.firstName,
-          guestId: opponent.playerId,
-          guestName: opponent.firstName,
-          status: 'active',
-          rated: true,
-          league: selectedLeague.name,
-          stake: selectedLeague.stake,
-          createdAt: Date.now()
-        };
-        await db.ref('battles/' + code).set(battleData);
-        window.ensureMatchRecord?.(code, battleData);
-        tryAssignWaitingReferee(code); // если кто-то уже ждёт в очереди судейства — не ждём, сразу подключаем
-
         warpAnnounceFound(() => {
           document.getElementById('rq-idle').style.display = 'block';
           document.getElementById('rq-waiting').style.display = 'none';
           warpOverlayEl.classList.remove('open');
-          showRoom(code, battleData, true);
+          showRoom(claim.code, claim.battleData, true);
         });
       } else {
-        // свободных нет — встаём в очередь сами и ждём, пока кто-то нас найдёт.
-        // Работаем через локальный queueRef, а не напрямую через общую
-        // переменную myQueueRef — пока идёт await set(), пользователь мог
-        // успеть нажать "Отменить поиск" (leaveRatingQueue обнуляет
-        // myQueueRef параллельно), и тогда myQueueRef.onDisconnect() ниже
-        // упал бы с "Cannot read properties of null" (см. репорт с двух
-        // реальных устройств — гонка воспроизводилась не в теории).
+        // свободных нет — встаём в очередь сами и ждём. Работаем через
+        // локальный queueRef, а не напрямую через общую переменную
+        // myQueueRef — пока идёт await set(), пользователь мог успеть
+        // нажать "Отменить поиск" (leaveRatingQueue обнуляет myQueueRef
+        // параллельно), и тогда myQueueRef.onDisconnect() ниже упал бы с
+        // "Cannot read properties of null" (см. репорт с двух реальных
+        // устройств — гонка воспроизводилась не в теории).
         const queueRef = db.ref('queue/' + myKey);
         myQueueRef = queueRef;
         await queueRef.set({
@@ -3825,6 +3834,7 @@
             const code = data.matchedRoom;
             queueRef.off('value', myQueueListener);
             myQueueListener = null;
+            if (myQueueWatchListener) { myQueueWatchRef?.off('child_added', myQueueWatchListener); myQueueWatchListener = null; myQueueWatchRef = null; }
             queueRef.onDisconnect().cancel();
             await queueRef.remove();
             if (myQueueRef === queueRef) myQueueRef = null;
@@ -3851,6 +3861,47 @@
               document.getElementById('rq-waiting').style.display = 'none';
             }
           }
+        });
+
+        // Пассивное ожидание (кто-то ДРУГОЙ активно ищет и находит нас
+        // сканированием выше) — не единственный путь: если два игрока
+        // нажали "Искать" почти одновременно, оба могут не увидеть друг
+        // друга при своём разовом сканировании (запись ещё не успела
+        // долететь до базы) и оба зависнуть в ожидании навсегда, пока не
+        // подключится кто-то третий. Этот второй слушатель следит за
+        // новыми записями в очереди той же лиги, пока мы ждём, и сам
+        // пытается "застолбить" их, ровно как активный поиск выше —
+        // закрывает именно этот случай "оба ждут и никто не сканирует".
+        const queueWatchRef = db.ref('queue').orderByChild('league').equalTo(selectedLeague.name);
+        myQueueWatchRef = queueWatchRef;
+        myQueueWatchListener = queueWatchRef.on('child_added', async (snap) => {
+          if (myQueueRef !== queueRef) return; // уже нашли соперника или отменили поиск
+          const candidateKey = snap.key;
+          if (candidateKey === myKey) return;
+          const candidate = snap.val();
+          if (!candidate || candidate.matchedRoom) return;
+          if (Date.now() - (candidate.joinedAt || 0) >= QUEUE_STALE_MS) return;
+          const presenceSnap = await db.ref('presence/' + candidateKey).once('value');
+          if (presenceSnap.val() !== true) return;
+          if (myQueueRef !== queueRef) return; // могли уже найти соперника, пока шли awaits выше
+
+          const claim = await attemptClaimOpponent(me, candidateKey, candidate);
+          if (!claim) return; // кто-то параллельно забрал этого кандидата — просто продолжаем ждать
+
+          if (myQueueListener) { queueRef.off('value', myQueueListener); myQueueListener = null; }
+          queueWatchRef.off('child_added', myQueueWatchListener);
+          myQueueWatchListener = null;
+          myQueueWatchRef = null;
+          queueRef.onDisconnect().cancel();
+          await queueRef.remove().catch(() => {});
+          if (myQueueRef === queueRef) myQueueRef = null;
+
+          warpAnnounceFound(() => {
+            document.getElementById('rq-idle').style.display = 'block';
+            document.getElementById('rq-waiting').style.display = 'none';
+            warpOverlayEl.classList.remove('open');
+            showRoom(claim.code, claim.battleData, true);
+          });
         });
       }
     } catch (err) {
@@ -5721,13 +5772,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.51 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.52 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 18.09.2026<br>
-        <span style="font-size:11px;">Служебное обновление — итог боя теперь дополнительно проверяется на сервере.</span>
+        <span style="font-size:11px;">Починен долгий поиск соперника: если два игрока нажимали "Искать" почти одновременно, оба могли зависнуть в ожидании навсегда, не заметив друг друга. Теперь во время ожидания идёт живое отслеживание новых заявок в очереди той же лиги, а не только разовая проверка по клику.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.51 — Служебное обновление — итог боя теперь дополнительно проверяется на сервере<br>
           v0.4.50 — Служебное обновление — подготовка к более надёжной защите новых аккаунтов<br>
           v0.4.49 — Служебное обновление правил доступа к базе данных<br>
           v0.4.48 — Новая иконка приложения (звезда) — desktop (Windows/Linux) и Android. Версия обёртки поднята до 1.0.2, подтянется автоматически через electron-updater<br>
