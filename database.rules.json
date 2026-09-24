@@ -5,13 +5,87 @@
     "users": {
       "$uid": {
         "role": {
-          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || newData.val() === 'admin' || newData.val() === 'superadmin'"
+          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || ((newData.val() === 'admin' || newData.val() === 'superadmin') && newData.parent().child('roleGrantKey').val() === '__ROLE_GRANT_KEY__')"
+        },
+        "roleGrantKey": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "status": {
+          ".validate": "(!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned') && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+        },
+        "adminActionKey": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "points": {
+          ".validate": "(!newData.exists() || newData.isNumber()) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+        },
+        "starsBalance": {
+          ".validate": "(!newData.exists() || (newData.isNumber() && newData.val() >= 0)) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+        },
+        "firstName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"
+        },
+        "deviceToken": {
+          ".validate": "!newData.exists() || newData.val().matches(/^[0-9a-f]+$/)"
+        },
+        "panelLocked": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "permissions": {
+          "$permKey": {
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "pendingName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 24)"
+        },
+        "pendingNameStatus": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'rejected'"
+        },
+        "pendingNameRejectionReason": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        }
+      }
+    },
+    "accessTokens": {
+      "$token": {
+        "label": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "permissions": {
+          "$permKey": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    },
+    "clans": {
+      "$code": {
+        "name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 24)"
+        },
+        "status": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
+        },
+        "chatLinkStatus": {
+          ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
         }
       }
     },
     "battles": {
       "$code": {
         ".validate": "newData.hasChildren(['hostId'])"
+      }
+    },
+    "owners": {
+      "$id": {
+        ".validate": "!data.exists() && newData.isString() && auth != null && newData.val() === auth.uid"
       }
     }
   }

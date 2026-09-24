@@ -28,4 +28,16 @@ jobs:
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
 
+      # database.rules.json committed to git only ever contains the literal
+      # placeholder __ROLE_GRANT_KEY__ — this repo is public, so the real
+      # value (a GitHub Actions secret, never printed/logged) is substituted
+      # in right before deploying, not stored in the file itself. Rotate it
+      # by updating the ROLE_GRANT_KEY repo secret (Settings → Secrets and
+      # variables → Actions) and the matching secret on the role-gateway
+      # Cloudflare Worker (battle-admin-bot repo) together — they must match.
+      - run: |
+          sed -i "s/__ROLE_GRANT_KEY__/${ROLE_GRANT_KEY}/" database.rules.json
+        env:
+          ROLE_GRANT_KEY: ${{ secrets.ROLE_GRANT_KEY }}
+
       - run: npx firebase-tools deploy --only database --project zolotaya-kletka
