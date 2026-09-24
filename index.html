@@ -1622,7 +1622,7 @@
     <div style="color:var(--muted); font-size:14px; line-height:1.5;" id="platform-lock-message">Скоро вернёмся — попробуй зайти чуть позже.</div>
   </div>
 </div>
-<script>window.showPlatformLock=function(e,t){document.getElementById("platform-lock-icon").textContent="emergency"===e?"🚨":"🛠",document.getElementById("platform-lock-title").textContent="emergency"===e?"Платформа временно недоступна":"Идут технические работы",document.getElementById("platform-lock-message").textContent=t||("emergency"===e?"Что-то пошло не так — мы уже разбираемся. Попробуй зайти позже.":"Скоро вернёмся — попробуй зайти чуть позже."),document.getElementById("platform-lock-overlay").classList.add("open")},window.hidePlatformLock=function(){document.getElementById("platform-lock-overlay").classList.remove("open")};</script>
+<script>window.showPlatformLock=function(e,t){document.getElementById("platform-lock-icon").textContent="emergency"===e?"🚨":"🛠",document.getElementById("platform-lock-title").textContent="emergency"===e?"Платформа недоступна":"Идут технические работы",document.getElementById("platform-lock-message").textContent=t||("emergency"===e?"Что-то пошло не так — мы уже разбираемся. Попробуй зайти позже.":"Скоро вернёмся — попробуй зайти чуть позже."),document.getElementById("platform-lock-overlay").classList.add("open")},window.hidePlatformLock=function(){document.getElementById("platform-lock-overlay").classList.remove("open")};</script>
 
 <!-- ===== закрытый бета-тест: заявка вместо мгновенного создания аккаунта
      =====
@@ -2661,13 +2661,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.52 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 18.09.2026<br>
-        <span style="font-size:11px;">Починен долгий поиск соперника: если два игрока нажимали "Искать" почти одновременно, оба могли зависнуть в ожидании навсегда, не заметив друг друга. Теперь во время ожидания идёт живое отслеживание новых заявок в очереди той же лиги, а не только разовая проверка по клику.</span>
+        <div class="v-num">MICBATTLE v0.4.53 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 24.09.2026<br>
+        <span style="font-size:11px;">Экран блокировки платформы («Аварийный режим» из админ-панели) больше не говорит «временно» — тот же режим теперь используется и для приостановки проекта на неопределённый срок, не только при инцидентах.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.52 — Починен долгий поиск соперника: если два игрока нажимали "Искать" почти одновременно, оба могли зависнуть в ожидании навсегда, не заметив друг друга. Теперь во время ожидания идёт живое отслеживание новых заявок в очереди той же лиги, а не только разовая проверка по клику<br>
           v0.4.51 — Служебное обновление — итог боя теперь дополнительно проверяется на сервере<br>
           v0.4.50 — Служебное обновление — подготовка к более надёжной защите новых аккаунтов<br>
           v0.4.49 — Служебное обновление правил доступа к базе данных<br>
