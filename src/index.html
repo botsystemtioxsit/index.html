@@ -5772,13 +5772,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.53 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 24.09.2026<br>
-        <span style="font-size:11px;">Экран блокировки платформы («Аварийный режим» из админ-панели) больше не говорит «временно» — тот же режим теперь используется и для приостановки проекта на неопределённый срок, не только при инцидентах.</span>
+        <div class="v-num">MICBATTLE v0.4.54 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 09.10.2026<br>
+        <span style="font-size:11px;">Запрос на вход с другого устройства теперь сам приходит в Telegram-бот с кнопками «Разрешить»/«Отклонить» — не нужно открывать игру, чтобы подтвердить вход.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.53 — Экран блокировки платформы («Аварийный режим» из админ-панели) больше не говорит «временно» — тот же режим теперь используется и для приостановки проекта на неопределённый срок, не только при инцидентах<br>
           v0.4.52 — Починен долгий поиск соперника: если два игрока нажимали "Искать" почти одновременно, оба могли зависнуть в ожидании навсегда, не заметив друг друга. Теперь во время ожидания идёт живое отслеживание новых заявок в очереди той же лиги, а не только разовая проверка по клику<br>
           v0.4.51 — Служебное обновление — итог боя теперь дополнительно проверяется на сервере<br>
           v0.4.50 — Служебное обновление — подготовка к более надёжной защите новых аккаунтов<br>
@@ -6134,6 +6135,10 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
     const reqRef = db.ref('users/' + targetTelegramId + '/loginRequests').push();
     return reqRef.set({ device: detectBrowserName(), requestedAt: Date.now(), status: 'pending' }).then(() => {
       const reqPath = 'users/' + targetTelegramId + '/loginRequests/' + reqRef.key;
+      // бот сам пишет владельцу аккаунта в Telegram с кнопками Разрешить/
+      // Отклонить (role-gateway → /login-notify); не дождались или упало —
+      // не страшно, заявку всё равно видно в Сообщество → Запросы
+      fetch('https://battle-role-gateway.tioxsit.workers.dev/login-notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telegramId: targetTelegramId, requestId: reqRef.key }) }).catch(() => {});
       statusEl.style.display = 'block';
       statusEl.style.color = 'var(--muted)';
       statusEl.textContent = '⏳ Заявка отправлена — подтверди её в Сообщество → Запросы на устройстве с настоящим Telegram-аккаунтом.';
