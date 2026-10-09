@@ -106,5 +106,13 @@
     "playerId" : "PLR-A44LA9",
     "telegramId" : "871656058",
     "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) Telegram-Android/13.0.0 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P3TNnMmTfKl3_81n5Xv" : {
+    "createdAt" : 1791511180867,
+    "firstName" : "TIOXSIT",
+    "log" : "[03:59:39] JS-ошибка: Script error.",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) Telegram-Android/13.0.0 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
   }
 }
