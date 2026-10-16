@@ -9,8 +9,8 @@ name: Deploy role-gateway Worker
 # JSON-ключ не нужно ни копировать, ни пересоздавать: он попадает прямо в
 # секреты Worker'а.
 #
-# Шаги: самотест (ключ реально пишет в базу в обход правил) → wrangler deploy
-# → ключ сервисного аккаунта кладётся Worker'у секретом → проверка /health.
+# Шаги: самотест (ключ реально пишет в базу в обход правил) → ключ сервисного
+# аккаунта кладётся Worker'у секретом → wrangler deploy → проверка /health.
 #
 # Разовая настройка — секреты ЭТОГО репозитория (Settings → Secrets and
 # variables → Actions):
@@ -91,15 +91,11 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: node .github/scripts/selftest-firebase-admin.mjs
 
-      - name: Выложить Worker
-        working-directory: gateway/cloudflare-worker/role-gateway
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
-          npx --yes "$WRANGLER" deploy --keep-vars
-
+      # Сначала секрет, потом код: новый код без FIREBASE_SERVICE_ACCOUNT отвечает
+      # 500 на всё (намеренно, без отката на ключ в данных), поэтому он не должен
+      # хоть на секунду оказаться выложенным без него. Старому коду секрет не мешает.
+      # Запускается вне каталога с конфигурацией из другого репозитория (--name):
+      # ключ сервисного аккаунта не должен соседствовать с чужим wrangler.toml.
       - name: Передать ключ сервисного аккаунта Worker'у (секрет FIREBASE_SERVICE_ACCOUNT)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -108,6 +104,15 @@ jobs:
         run: |
           [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" | npx --yes "$WRANGLER" secret put FIREBASE_SERVICE_ACCOUNT --name "$WORKER_NAME"
+
+      - name: Выложить Worker
+        working-directory: gateway/cloudflare-worker/role-gateway
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
+          npx --yes "$WRANGLER" deploy --keep-vars
 
       - name: Проверить, что Worker настроен и работает в admin-режиме
         run: |
