@@ -5,22 +5,16 @@
     "users": {
       "$uid": {
         "role": {
-          ".validate": "newData.val() === 'user' || newData.val() === 'moderator' || ((newData.val() === 'admin' || newData.val() === 'superadmin') && newData.parent().child('roleGrantKey').val() === '__ROLE_GRANT_KEY__')"
-        },
-        "roleGrantKey": {
-          ".validate": "!newData.exists() || newData.isString()"
+          ".validate": "newData.val() === 'user' || newData.val() === 'moderator'"
         },
         "status": {
-          ".validate": "(!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned') && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
-        },
-        "adminActionKey": {
-          ".validate": "!newData.exists() || newData.isString()"
+          ".validate": "(!newData.exists() || newData.val() === 'active' || newData.val() === 'restricted' || newData.val() === 'banned') && (!root.child('owners').child($uid).exists() || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
         },
         "points": {
-          ".validate": "(!newData.exists() || newData.isNumber()) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+          ".validate": "(!newData.exists() || newData.isNumber()) && (!root.child('owners').child($uid).exists() || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
         },
         "starsBalance": {
-          ".validate": "(!newData.exists() || (newData.isNumber() && newData.val() >= 0)) && (!root.child('owners').child($uid).exists() || newData.parent().child('adminActionKey').val() === '__ROLE_GRANT_KEY__' || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
+          ".validate": "(!newData.exists() || (newData.isNumber() && newData.val() >= 0)) && (!root.child('owners').child($uid).exists() || (auth != null && root.child('owners').child($uid).val() === auth.uid))"
         },
         "firstName": {
           ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 64)"
@@ -34,6 +28,11 @@
         "permissions": {
           "$permKey": {
             ".validate": "newData.isBoolean()"
+          }
+        },
+        "trustedDevices": {
+          "$deviceKey": {
+            ".validate": false
           }
         },
         "pendingName": {
