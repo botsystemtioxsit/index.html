@@ -6,15 +6,41 @@ name: Deploy Database Rules on Push
     paths:
       - 'database.rules.json'
       - 'firebase.json'
-  workflow_dispatch: {}
+  workflow_dispatch:
     # ^ кнопка "Run workflow" на вкладке Actions — запуск вручную,
     #   без необходимости коммитить именно эти два файла
+    inputs:
+      skip_worker_check:
+        description: 'Аварийно: выложить правила, не проверяя режим Worker (обычно НЕ нужно)'
+        type: boolean
+        default: false
 
 jobs:
   deploy_rules:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Предохранитель: эти правила не пускают клиентов записывать role
+      # admin/superadmin, чужие status/points/starsBalance owner-аккаунтов и
+      # trustedDevices — ими пользуется только Worker, и только в admin-режиме
+      # (токен сервисного аккаунта, в обход правил). Если выложить правила, пока
+      # Worker ещё в старом режиме, перестанут работать выдача ролей, бан,
+      # итоги боёв и доверие устройств. Поэтому без firebaseAdminConfigured:true
+      # правила не выкладываются.
+      - name: Проверить, что role-gateway уже в admin-режиме
+        if: ${{ github.event.inputs.skip_worker_check != 'true' }}
+        run: |
+          for i in 1 2 3; do
+            out=$(curl -fsS --max-time 15 "https://battle-role-gateway.tioxsit.workers.dev/health" || true)
+            echo "health: $out"
+            if echo "$out" | grep -q '"firebaseAdminConfigured":true'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::role-gateway ещё не в admin-режиме (/health без firebaseAdminConfigured:true). Сначала выложите Worker: Actions → «Deploy role-gateway Worker», потом перезапустите это задание."
+          exit 1
 
       - uses: actions/setup-node@v4
         with:

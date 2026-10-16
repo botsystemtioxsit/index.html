@@ -1,0 +1,124 @@
+name: Deploy role-gateway Worker
+
+# Выкладка Cloudflare Worker'а role-gateway (код — в репозитории
+# battle-admin-bot, cloudflare-worker/role-gateway) без терминала: кнопка
+# "Run workflow" на вкладке Actions этого репозитория. Живёт здесь, а не в
+# battle-admin-bot, потому что секреты GitHub хранятся отдельно для каждого
+# репозитория, а ключ сервисного аккаунта Firebase (FIREBASE_SERVICE_ACCOUNT)
+# уже лежит именно тут — его же использует firebase-database-deploy.yml. Так
+# JSON-ключ не нужно ни копировать, ни пересоздавать: он попадает прямо в
+# секреты Worker'а.
+#
+# Шаги: самотест (ключ реально пишет в базу в обход правил) → wrangler deploy
+# → ключ сервисного аккаунта кладётся Worker'у секретом → проверка /health.
+#
+# Разовая настройка — секреты ЭТОГО репозитория (Settings → Secrets and
+# variables → Actions):
+#   CLOUDFLARE_API_TOKEN     — токен Cloudflare по шаблону «Edit Cloudflare
+#                              Workers» (dash.cloudflare.com → My Profile →
+#                              API Tokens → Create Token)
+#   CLOUDFLARE_ACCOUNT_ID    — необязательно; нужен, только если токен видит
+#                              несколько аккаунтов Cloudflare
+#   FIREBASE_SERVICE_ACCOUNT — уже есть
+# Секреты самого Worker'а (BOT_TOKEN, GITHUB_TOKEN) переживают выкладку и
+# здесь не трогаются (deploy идёт с --keep-vars).
+#
+# Что выкладывается: ветка/тег/коммит battle-admin-bot из поля gateway_ref
+# (по умолчанию main). Выкладывается код из другого репозитория, поэтому
+# секрет Firebase в шаги, которые читают этот код (wrangler deploy), не
+# передаётся: самотест — свой собственный файл из этого репозитория, а
+# секрет Worker'у кладётся отдельным шагом без конфигурации из чужого репо.
+
+on:
+  workflow_dispatch:
+    inputs:
+      gateway_ref:
+        description: 'Что выложить из battle-admin-bot: ветка, тег или коммит'
+        required: true
+        default: main
+
+concurrency:
+  group: deploy-role-gateway
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      WORKER_NAME: battle-role-gateway
+      WORKER_URL: https://battle-role-gateway.tioxsit.workers.dev
+      WRANGLER: wrangler@4.151.1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: botsystemtioxsit/battle-admin-bot
+          ref: ${{ inputs.gateway_ref }}
+          path: gateway
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Что именно выкладываем
+        run: git -C gateway log -1 --format='Коммит %H%n%an, %ad%n%s'
+
+      - name: Проверить, что нужные секреты заданы
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          missing=0
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Нет секрета CLOUDFLARE_API_TOKEN в ЭТОМ репозитории (index.html) — создайте токен Cloudflare по шаблону «Edit Cloudflare Workers» и добавьте в Settings → Secrets and variables → Actions."
+            missing=1
+          fi
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::Нет секрета FIREBASE_SERVICE_ACCOUNT."
+            missing=1
+          fi
+          exit $missing
+
+      - name: Самотест — ключ сервисного аккаунта пишет в базу в обход правил
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node .github/scripts/selftest-firebase-admin.mjs
+
+      - name: Выложить Worker
+        working-directory: gateway/cloudflare-worker/role-gateway
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
+          npx --yes "$WRANGLER" deploy --keep-vars
+
+      - name: Передать ключ сервисного аккаунта Worker'у (секрет FIREBASE_SERVICE_ACCOUNT)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" | npx --yes "$WRANGLER" secret put FIREBASE_SERVICE_ACCOUNT --name "$WORKER_NAME"
+
+      - name: Проверить, что Worker настроен и работает в admin-режиме
+        run: |
+          for i in 1 2 3 4 5 6; do
+            out=$(curl -fsS --max-time 15 "$WORKER_URL/health" || true)
+            echo "health: $out"
+            if echo "$out" | grep -q '"firebaseAdminConfigured":true' && echo "$out" | grep -q '"botTokenConfigured":true'; then
+              echo "Worker выложен и пишет в базу токеном сервисного аккаунта."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::После выкладки /health не показывает botTokenConfigured:true и firebaseAdminConfigured:true — Worker настроен не полностью (BOT_TOKEN потерян или секрет не лёг)."
+          exit 1
