@@ -3,7 +3,7 @@
     ".read": true,
     ".write": true,
     "users": {
-      ".indexOn": ["playerId", "role"],
+      ".indexOn": ["playerId", "role", "pendingNameStatus"],
       "$uid": {
         "role": {
           ".validate": "newData.val() === 'user' || newData.val() === 'moderator'"
