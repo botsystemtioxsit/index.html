@@ -63,9 +63,10 @@ jobs:
           path: gateway
           persist-credentials: false
 
+      # wrangler 4.x требует Node.js >= 22 (на 20 падает "Wrangler requires at least Node.js v22")
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Что именно выкладываем
         run: git -C gateway log -1 --format='Коммит %H%n%an, %ad%n%s'
