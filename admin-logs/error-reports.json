@@ -114,5 +114,77 @@
     "playerId" : "PLR-A44LA9",
     "telegramId" : "871656058",
     "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) Telegram-Android/13.0.0 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P46U8cqwGe51x46MTbN" : {
+    "createdAt" : 1792200710668,
+    "firstName" : "♱[𝙾𝚇𝚂]♱1",
+    "log" : "[03:31:45] Рейтинговый бой: не удалось застолбить соперника 8812725692 — гонка, ищем снова",
+    "playerId" : "PLR-REHMTQ",
+    "telegramId" : "8563912326",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.8059.43 Mobile Safari/537.36 Telegram-Android/13.0.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P46U9qoQOYAdGWM36t7" : {
+    "createdAt" : 1792200716059,
+    "firstName" : "ℨ ∀ Π ᖘ Ξ ₸#старший",
+    "log" : "[03:31:47] Рейтинговый бой: matchedRoom=SJY9P, но battles/SJY9P так и не появился",
+    "playerId" : "PLR-U764GT",
+    "telegramId" : "8812725692",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "-P46UD6R5FzWpXrNDILq" : {
+    "createdAt" : 1792200729411,
+    "firstName" : "ℨ ∀ Π ᖘ Ξ ₸#старший",
+    "log" : "[03:31:47] Рейтинговый бой: matchedRoom=SJY9P, но battles/SJY9P так и не появился\n[03:32:05] Голос (LiveKit): токен получен, identity=host-3FXXN-eo4g54, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:32:05] Голос (LiveKit): состояние: connecting\n[03:32:07] Голос (LiveKit): состояние: connected\n[03:32:07] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-U764GT",
+    "telegramId" : "8812725692",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "-P46UEmmY7oEKdjS_SV6" : {
+    "createdAt" : 1792200735881,
+    "firstName" : "♱[𝙾𝚇𝚂]♱1",
+    "log" : "[03:31:45] Рейтинговый бой: не удалось застолбить соперника 8812725692 — гонка, ищем снова\n[03:32:05] Голос (LiveKit): токен получен, identity=guest-3FXXN-8c35y1, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:32:05] Голос (LiveKit): состояние: connecting\n[03:32:06] Голос (LiveKit): состояние: connected\n[03:32:07] Голос (LiveKit): получили аудио-трек: stateless-pixel\n[03:32:09] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-REHMTQ",
+    "telegramId" : "8563912326",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.8059.43 Mobile Safari/537.36 Telegram-Android/13.0.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P46VHRPZqbfxATcUTK6" : {
+    "createdAt" : 1792201008881,
+    "firstName" : "♱[𝙾𝚇𝚂]♱1",
+    "log" : "[03:31:45] Рейтинговый бой: не удалось застолбить соперника 8812725692 — гонка, ищем снова\n[03:32:05] Голос (LiveKit): токен получен, identity=guest-3FXXN-8c35y1, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:32:05] Голос (LiveKit): состояние: connecting\n[03:32:06] Голос (LiveKit): состояние: connected\n[03:32:07] Голос (LiveKit): получили аудио-трек: stateless-pixel\n[03:32:09] Голос (LiveKit): подключено и микрофон включён\n[03:36:02] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-REHMTQ",
+    "telegramId" : "8563912326",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 17; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.8059.43 Mobile Safari/537.36 Telegram-Android/13.0.2 (Samsung SM-S948B; Android 17; SDK 37; HIGH)"
+  },
+  "-P46VHmxSMhBg40Vod_V" : {
+    "createdAt" : 1792201010724,
+    "firstName" : "ℨ ∀ Π ᖘ Ξ ₸#старший",
+    "log" : "[03:31:47] Рейтинговый бой: matchedRoom=SJY9P, но battles/SJY9P так и не появился\n[03:32:05] Голос (LiveKit): токен получен, identity=host-3FXXN-eo4g54, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:32:05] Голос (LiveKit): состояние: connecting\n[03:32:07] Голос (LiveKit): состояние: connected\n[03:32:07] Голос (LiveKit): подключено и микрофон включён\n[03:32:09] Голос (LiveKit): получили аудио-трек: artificial-opcode\n[03:36:05] Голос (LiveKit): состояние: disconnected\n[03:36:49] Голос (LiveKit): токен получен, identity=guest-FCF25-lbzwgx, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:36:49] Голос (LiveKit): состояние: connecting\n[03:36:50] Голос (LiveKit): состояние: connected",
+    "playerId" : "PLR-U764GT",
+    "telegramId" : "8812725692",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "-P46VU9C1hJi6ZkaawWp" : {
+    "createdAt" : 1792201060933,
+    "firstName" : "TIOXSIT",
+    "log" : "[03:36:49] Голос (LiveKit): токен получен, identity=host-FCF25-v7a9k6, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:36:49] Голос (LiveKit): состояние: connecting\n[03:36:50] Голос (LiveKit): состояние: connected\n[03:36:50] Голос (LiveKit): получили аудио-трек: scalable-stream\n[03:36:50] Голос (LiveKit): подключено и микрофон включён\n[03:37:06] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+  },
+  "-P46WgzRlUdRSxCwV3WE" : {
+    "createdAt" : 1792201380163,
+    "firstName" : "ℨ ∀ Π ᖘ Ξ ₸#старший",
+    "log" : "[03:31:47] Рейтинговый бой: matchedRoom=SJY9P, но battles/SJY9P так и не появился\n[03:32:05] Голос (LiveKit): токен получен, identity=host-3FXXN-eo4g54, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:32:05] Голос (LiveKit): состояние: connecting\n[03:32:07] Голос (LiveKit): состояние: connected\n[03:32:07] Голос (LiveKit): подключено и микрофон включён\n[03:32:09] Голос (LiveKit): получили аудио-трек: artificial-opcode\n[03:36:05] Голос (LiveKit): состояние: disconnected\n[03:36:49] Голос (LiveKit): токен получен, identity=guest-FCF25-lbzwgx, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[03:36:49] Голос (LiveKit): состояние: connecting\n[03:36:50] Голос (LiveKit): состояние: connected\n[03:36:50] Голос (LiveKit): подключено и микрофон включён\n[03:36:51] Голос (LiveKit): получили аудио-трек: emergent-array\n[03:37:03] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-U764GT",
+    "telegramId" : "8812725692",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "-P46YtU4K1w-YUBox8qL" : {
+    "createdAt" : 1792201954955,
+    "firstName" : "мишаня анимешник",
+    "log" : "[06:52:26] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.",
+    "playerId" : "PLR-3WCDXQ",
+    "telegramId" : "5645241299",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.8059.43 Mobile Safari/537.36 Telegram-Android/13.0.2 (Xiaomi M2101K6G; Android 13; SDK 33; HIGH)"
   }
 }
