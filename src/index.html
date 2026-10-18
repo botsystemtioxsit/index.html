@@ -4767,7 +4767,7 @@
     const loginHtml = loginList.map(({ key, request }) => `
       <div style="background:var(--panel); border:1px solid rgba(var(--gold-rgb),0.4); border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:10px; margin-bottom:8px;">
         <div class="profile-avatar" style="width:34px; height:34px; font-size:16px; flex-shrink:0;">🔐</div>
-        <div style="flex:1; min-width:0; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Вход: ${escapeHtml(request.device || 'неизвестное устройство')}</div>
+        <div style="flex:1; min-width:0; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(loginTargetLabel(request) + (request.device || 'неизвестное устройство'))}</div>
         <button type="button" class="community-approve-login" data-key="${key}" style="background:var(--gold); border:none; color:#0B0B0D; border-radius:100px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;">✓ Разрешить</button>
         <button type="button" class="community-deny-login" data-key="${key}" style="background:none; border:1px solid var(--line); color:var(--muted); border-radius:100px; width:30px; height:30px; font-size:14px; cursor:pointer; flex-shrink:0;">✕</button>
       </div>
@@ -6102,6 +6102,13 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
     }
   }
   window.updateAccountLoginUI = updateAccountLoginUI;
+
+  // Куда входят: поле app в заявке пишет сама страница (игра — 'game', панель —
+  // 'admin'); выводим только из белого списка, нет поля — как раньше «Вход: …»
+  function loginTargetLabel(req) {
+    const app = req && req.app;
+    return app === 'game' ? 'Вход в игру: ' : app === 'admin' ? 'Вход в админ-панель: ' : 'Вход: ';
+  }
 
   function detectBrowserName() {
     const ua = navigator.userAgent;
