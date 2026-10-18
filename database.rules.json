@@ -3,7 +3,7 @@
     ".read": true,
     ".write": true,
     "users": {
-      ".indexOn": ["playerId", "role", "pendingNameStatus"],
+      ".indexOn": ["playerId", "role", "pendingNameStatus", "createdAt"],
       "$uid": {
         "role": {
           ".validate": "newData.val() === 'user' || newData.val() === 'moderator'"
@@ -70,6 +70,9 @@
     },
     "queue": {
       ".indexOn": ["league"]
+    },
+    "matches": {
+      ".indexOn": ["finishedAt"]
     },
     "deviceTrustRequests": {
       ".indexOn": ["status"]
