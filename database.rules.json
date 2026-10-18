@@ -3,6 +3,7 @@
     ".read": true,
     ".write": true,
     "users": {
+      ".indexOn": ["playerId", "role", "pendingNameStatus"],
       "$uid": {
         "role": {
           ".validate": "newData.val() === 'user' || newData.val() === 'moderator'"
@@ -63,6 +64,15 @@
           }
         }
       }
+    },
+    "logs": {
+      ".indexOn": ["targetKey"]
+    },
+    "queue": {
+      ".indexOn": ["league"]
+    },
+    "deviceTrustRequests": {
+      ".indexOn": ["status"]
     },
     "clans": {
       "$code": {
