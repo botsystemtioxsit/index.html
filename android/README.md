@@ -18,7 +18,7 @@
 Собирается через GitHub Actions (Android SDK + Gradle не нужны локально):
 вкладка **Actions** → **Build Android APK** → **Run workflow**, либо
 автоматически при любом пуше, который трогает `android/`. Готовый
-`app-debug.apk` публикуется как вложение к GitHub Release этого репозитория
+`troll-battle.apk` публикуется как вложение к GitHub Release этого репозитория
 под фиксированным тегом `android-latest` — ссылка не меняется между
 сборками.
 
