@@ -1,6 +1,6 @@
 {
   "name": "troll-battle-desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "Десктоп-приложение (Electron) для игры «Тролль-Баттл» — окно, которое открывает живую игру без браузера.",
   "author": {
@@ -52,7 +52,12 @@
       "target": [
         "nsis"
       ],
-      "icon": "icon.png"
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico"
     }
   }
 }

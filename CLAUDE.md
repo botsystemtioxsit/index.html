@@ -76,3 +76,11 @@ Retrofit, not a rewrite: Russian strings stay hardcoded in the markup. `window.I
 
 ### Firebase project
 `zolotaya-kletka` (config/keys are the public client-side web config, not secret — see the comment above `firebaseConfig`; the real protection boundary is `database.rules.json`, which is intentionally permissive). `firebase.json` deploys only Hosting + Database rules; `.github/workflows/firebase-database-deploy.yml` auto-deploys `database.rules.json`/`firebase.json` on push to `main`.
+
+## Working agreement with the owner
+
+The owner is non-technical and Russian-speaking (often dictates by voice). Standing rules, set by them:
+- **Do what is asked and publish it.** For a requested task, finish it, open the PR, merge it, check the result and report — no separate "may I publish?" step. (Worker deploys, releases and the like are part of publishing.)
+- **Your own ideas: ask first.** Anything the owner did not ask for (extra features, clean-ups, deleting things) is proposed as a short yes/no question before doing it. Creativity is welcome.
+- **Say what limits you**, plainly (e.g. cannot see the phone or PC, cannot set GitHub/Cloudflare secrets or BotFather settings, the sandbox's safety layer blocks some actions such as installing third-party skills into the agent's own config).
+- **Write short and plain.** Lead with what happened or what to do; no jargon; one check at a time; skip long explanations — the owner loses the thread in walls of text.
