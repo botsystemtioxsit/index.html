@@ -7,11 +7,17 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.tioxsit.trollbattle"
+        // Суффикс .icontest — не опечатка и не тест. На телефоне владельца под прежним
+        // именем пакета com.tioxsit.trollbattle лаунчер показывал СТАРЫЙ значок (и после
+        // переустановки), а тот же APK под новым именем сразу показал новый — похоже,
+        // лаунчер держит значок за именем пакета. Прежнее имя возвращать не нужно:
+        // значок, скорее всего, снова станет старым. Код (namespace и пакет в java/)
+        // от этого не зависит.
+        applicationId "com.tioxsit.trollbattle.icontest"
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 6
+        versionName "1.0.5"
     }
 
     signingConfigs {
