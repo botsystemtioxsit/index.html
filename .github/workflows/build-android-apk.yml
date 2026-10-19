@@ -71,9 +71,32 @@ jobs:
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk android/troll-battle.apk
 
+      # Сборка с ветки в релиз не попадает, но файл можно скачать из запуска
+      # (Actions → запуск → Artifacts) и проверить до слияния в main.
+      - name: Upload APK as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: android/troll-battle.apk
+          retention-days: 3
+
       - name: Read version
         id: ver
         run: echo "version=$(grep -o 'versionName "[^"]*"' android/app/build.gradle | cut -d'"' -f2)" >> "$GITHUB_OUTPUT"
+
+      # Сборка с ветки: отдельный тестовый релиз android-test (не android-latest),
+      # чтобы её можно было скачать и проверить на телефоне до слияния в main.
+      # Удаляется сам при следующей выкладке в main (см. последний шаг).
+      - name: Publish test build (branches only)
+        if: github.ref != 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-test
+          name: ТЕСТОВАЯ сборка Тролль-Баттл (Android) — не последняя версия
+          prerelease: true
+          files: android/troll-battle.apk
+          body: |
+            Проверочная сборка из ветки ${{ github.ref_name }} (коммит ${{ github.sha }}). Это не основная версия: обычная лежит в релизе android-latest.
 
       - name: Publish GitHub Release with APK attached
         if: github.ref == 'refs/heads/main'
@@ -93,3 +116,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release delete-asset android-latest app-debug.apk --yes --repo "$GITHUB_REPOSITORY" || true
+
+      - name: Remove the test release (main only)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete android-test --cleanup-tag --yes --repo "$GITHUB_REPOSITORY" || true
