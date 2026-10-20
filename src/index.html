@@ -2465,6 +2465,19 @@
   <div class="sheet" style="text-align:center; padding:32px 20px;">
     <div id="battle-result-title" style="font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; margin-bottom:14px;">Бой завершён</div>
     <div id="battle-result-points" style="font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:1px; margin-bottom:24px;"></div>
+    <button id="battle-report-btn" style="display:none; width:100%; margin-bottom:12px; background:none; border:1px solid var(--line); color:var(--muted); border-radius:12px; padding:10px; font-size:13px; cursor:pointer;">🚩 Пожаловаться на соперника</button>
+    <div id="battle-report-form" style="display:none; text-align:left; margin-bottom:14px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:12px;">
+      <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Обычный троллинг — часть игры. Жалуйся на то, что за гранью: угрозы, травлю, дискриминацию (по расе, религии, полу и т. п. — она в игре запрещена), домогательства, спам.</div>
+      <select id="battle-report-reason" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px; font-size:13px; margin-bottom:8px;">
+        <option value="threats">Угрозы или травля</option>
+        <option value="discrimination">Дискриминация</option>
+        <option value="sexual">Сексуальные домогательства</option>
+        <option value="spam">Спам или реклама</option>
+        <option value="other">Другое</option>
+      </select>
+      <button id="battle-report-send" class="sheet-cta" style="margin-top:0;">Отправить жалобу</button>
+      <div id="battle-report-msg" style="font-size:12px; margin-top:8px; display:none;"></div>
+    </div>
     <button class="sheet-cta" id="battle-result-close-btn" style="margin-top:0;">Понятно</button>
   </div>
 </div>
@@ -2740,6 +2753,7 @@
         const myRole = myRoomRole;
         const myPlayerId = window.currentPlayer?.playerId;
         closeRoom(); // сразу гасит голос/микрофон — не ждём, пока нажмут "Понятно"
+        lastResultBattleCode = code;
         showBattleResult(myRole, battle, myPlayerId);
         // battles/<code> хранит только дельту (pointsAwarded), а не сам
         // новый баланс — трофеи в базе уже начислены (finishMatch это делает
@@ -2800,8 +2814,86 @@
         pointsEl.style.display = 'none';
       }
     }
+    prepareBattleReport(myRole, battle, myPlayerId);
     document.getElementById('battle-result-overlay').classList.add('open');
   }
+
+  // ===== Жалобы на игроков (reports/<pushId>) =====
+  // Жалобу можно подать на соперника из окна итога боя. Читает их админ-панель (вкладка «Журнал»,
+  // «Жалобы игроков»). Только бойцы: у судьи и зрителя в итоге нет id участников. Фейковые
+  // DEMO-BOT/DEMO-REF не в счёт. Защита от заваливания: не больше REPORT_DAILY_LIMIT жалоб в сутки
+  // с этого устройства и одна жалоба на одного соперника в одном бою (localStorage — только удобство,
+  // база открыта на запись, настоящие меры — на стороне модераторов).
+  const REPORT_DAILY_LIMIT = 10;
+  const REPORT_REASONS = ['threats', 'discrimination', 'sexual', 'spam', 'other'];
+  let pendingReport = null;
+  let lastResultBattleCode = null;
+
+  function readSentReports() {
+    try {
+      const list = JSON.parse(window.localStorage.getItem('battleSentReports') || '[]');
+      return Array.isArray(list) ? list.filter((r) => r && typeof r.at === 'number' && Date.now() - r.at < 24 * 3600 * 1000) : [];
+    } catch (_) { return []; }
+  }
+
+  function prepareBattleReport(myRole, battle, myPlayerId) {
+    const btn = document.getElementById('battle-report-btn');
+    const form = document.getElementById('battle-report-form');
+    form.style.display = 'none';
+    document.getElementById('battle-report-msg').style.display = 'none';
+    document.getElementById('battle-report-send').disabled = false;
+    pendingReport = null;
+    const iAmHost = !!myPlayerId && myPlayerId === battle.hostId;
+    const iAmGuest = !!myPlayerId && myPlayerId === battle.guestId;
+    const targetId = iAmHost ? battle.guestId : iAmGuest ? battle.hostId : null;
+    if (!targetId || targetId === 'DEMO-BOT' || targetId === 'DEMO-REF' || !/^[A-Za-z0-9_-]{1,64}$/.test(String(targetId))) {
+      btn.style.display = 'none';
+      return;
+    }
+    pendingReport = {
+      reporterId: String(myPlayerId),
+      targetId: String(targetId),
+      targetName: String((iAmHost ? battle.guestName : battle.hostName) || '').slice(0, 40),
+      battleCode: lastResultBattleCode,
+    };
+    btn.style.display = 'block';
+  }
+
+  document.getElementById('battle-report-btn').addEventListener('click', () => {
+    document.getElementById('battle-report-form').style.display = 'block';
+    document.getElementById('battle-report-btn').style.display = 'none';
+  });
+
+  document.getElementById('battle-report-send').addEventListener('click', async () => {
+    const msg = document.getElementById('battle-report-msg');
+    const sendBtn = document.getElementById('battle-report-send');
+    const say = (text, ok) => { msg.textContent = text; msg.style.color = ok ? 'var(--gold)' : 'var(--live)'; msg.style.display = 'block'; };
+    if (!pendingReport) return;
+    const reason = document.getElementById('battle-report-reason').value;
+    if (!REPORT_REASONS.includes(reason)) return;
+    const sent = readSentReports();
+    if (sent.length >= REPORT_DAILY_LIMIT) { say('Сегодня уже много жалоб — попробуй завтра.', false); return; }
+    const key = pendingReport.battleCode + ':' + pendingReport.targetId;
+    if (sent.some((r) => r.key === key)) { say('Ты уже пожаловался на этого игрока в этом бою.', false); return; }
+    sendBtn.disabled = true;
+    try {
+      await db.ref('reports').push({
+        reporterId: pendingReport.reporterId,
+        targetId: pendingReport.targetId,
+        targetName: pendingReport.targetName,
+        battleCode: pendingReport.battleCode || null,
+        reason,
+        createdAt: Date.now(),
+        status: 'new',
+      });
+      sent.push({ key, at: Date.now() });
+      window.localStorage.setItem('battleSentReports', JSON.stringify(sent));
+      say('Жалоба отправлена, модераторы посмотрят. Спасибо!', true);
+    } catch (err) {
+      sendBtn.disabled = false;
+      say('Не удалось отправить жалобу, попробуй ещё раз.', false);
+    }
+  });
   document.getElementById('battle-result-close-btn').addEventListener('click', () => {
     document.getElementById('battle-result-overlay').classList.remove('open');
   });
@@ -5772,13 +5864,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.57 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 20.10.2026<br>
-        <span style="font-size:11px;">Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас».</span>
+        <div class="v-num">MICBATTLE v0.4.58 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 21.10.2026<br>
+        <span style="font-size:11px;">После боя можно пожаловаться на соперника: угрозы, травля, дискриминация (в игре запрещена), домогательства, спам. Жалобы читают модераторы в админ-панели.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.57 — Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас»<br>
           v0.4.56 — В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков»<br>
           v0.4.55 — Сообщение в Telegram-боте о запросе на вход говорит, куда именно входят (игра) и с какого устройства; кнопки «Разрешить»/«Отклонить» снова срабатывают. Новая иконка игры — красная звезда<br>
           v0.4.54 — Запрос на вход с другого устройства теперь сам приходит в Telegram-бот с кнопками «Разрешить»/«Отклонить» — не нужно открывать игру, чтобы подтвердить вход<br>
