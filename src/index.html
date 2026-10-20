@@ -2465,16 +2465,9 @@
   <div class="sheet" style="text-align:center; padding:32px 20px;">
     <div id="battle-result-title" style="font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:1px; margin-bottom:14px;">Бой завершён</div>
     <div id="battle-result-points" style="font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:1px; margin-bottom:24px;"></div>
-    <button id="battle-report-btn" style="display:none; width:100%; margin-bottom:12px; background:none; border:1px solid var(--line); color:var(--muted); border-radius:12px; padding:10px; font-size:13px; cursor:pointer;">🚩 Пожаловаться на соперника</button>
+    <button id="battle-report-btn" style="display:none; width:100%; margin-bottom:12px; background:none; border:1px solid var(--line); color:var(--muted); border-radius:12px; padding:10px; font-size:13px; cursor:pointer;">🚩 Пожаловаться на дискриминацию</button>
     <div id="battle-report-form" style="display:none; text-align:left; margin-bottom:14px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:12px;">
-      <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Обычный троллинг — часть игры. Жалуйся на то, что за гранью: угрозы, травлю, дискриминацию (по расе, религии, полу и т. п. — она в игре запрещена), домогательства, спам.</div>
-      <select id="battle-report-reason" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:9px; font-size:13px; margin-bottom:8px;">
-        <option value="threats">Угрозы или травля</option>
-        <option value="discrimination">Дискриминация</option>
-        <option value="sexual">Сексуальные домогательства</option>
-        <option value="spam">Спам или реклама</option>
-        <option value="other">Другое</option>
-      </select>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Тролль-Баттл — это словесные баталии, обычные оскорбления в бою — часть игры. Запрещена только дискриминация: унижение человека по национальности, расе или религии. Если соперник перешёл эту грань — отправь жалобу, модераторы посмотрят.</div>
       <button id="battle-report-send" class="sheet-cta" style="margin-top:0;">Отправить жалобу</button>
       <div id="battle-report-msg" style="font-size:12px; margin-top:8px; display:none;"></div>
     </div>
@@ -2825,7 +2818,8 @@
   // с этого устройства и одна жалоба на одного соперника в одном бою (localStorage — только удобство,
   // база открыта на запись, настоящие меры — на стороне модераторов).
   const REPORT_DAILY_LIMIT = 10;
-  const REPORT_REASONS = ['threats', 'discrimination', 'sexual', 'spam', 'other'];
+  // Жалобиться можно только на дискриминацию (национальную, расовую, религиозную) — остальное в игре разрешено
+  const REPORT_REASON = 'discrimination';
   let pendingReport = null;
   let lastResultBattleCode = null;
 
@@ -2869,8 +2863,7 @@
     const sendBtn = document.getElementById('battle-report-send');
     const say = (text, ok) => { msg.textContent = text; msg.style.color = ok ? 'var(--gold)' : 'var(--live)'; msg.style.display = 'block'; };
     if (!pendingReport) return;
-    const reason = document.getElementById('battle-report-reason').value;
-    if (!REPORT_REASONS.includes(reason)) return;
+    const reason = REPORT_REASON;
     const sent = readSentReports();
     if (sent.length >= REPORT_DAILY_LIMIT) { say('Сегодня уже много жалоб — попробуй завтра.', false); return; }
     const key = pendingReport.battleCode + ':' + pendingReport.targetId;
@@ -5864,13 +5857,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.58 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.59 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 21.10.2026<br>
-        <span style="font-size:11px;">После боя можно пожаловаться на соперника: угрозы, травля, дискриминация (в игре запрещена), домогательства, спам. Жалобы читают модераторы в админ-панели.</span>
+        <span style="font-size:11px;">После боя можно пожаловаться на соперника, если он перешёл грань и унижал по национальности, расе или религии: дискриминация в игре запрещена. Обычные оскорбления в бою — часть игры. Жалобы читают модераторы.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.58 — После боя можно пожаловаться на соперника (угрозы, травля, дискриминация, домогательства, спам). Жалобы читают модераторы в админ-панели<br>
           v0.4.57 — Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас»<br>
           v0.4.56 — В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков»<br>
           v0.4.55 — Сообщение в Telegram-боте о запросе на вход говорит, куда именно входят (игра) и с какого устройства; кнопки «Разрешить»/«Отклонить» снова срабатывают. Новая иконка игры — красная звезда<br>
