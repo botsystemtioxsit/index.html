@@ -5772,13 +5772,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.56 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 18.10.2026<br>
-        <span style="font-size:11px;">В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков».</span>
+        <div class="v-num">MICBATTLE v0.4.57 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 20.10.2026<br>
+        <span style="font-size:11px;">Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас».</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.56 — В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков»<br>
           v0.4.55 — Сообщение в Telegram-боте о запросе на вход говорит, куда именно входят (игра) и с какого устройства; кнопки «Разрешить»/«Отклонить» снова срабатывают. Новая иконка игры — красная звезда<br>
           v0.4.54 — Запрос на вход с другого устройства теперь сам приходит в Telegram-бот с кнопками «Разрешить»/«Отклонить» — не нужно открывать игру, чтобы подтвердить вход<br>
           v0.4.53 — Экран блокировки платформы («Аварийный режим» из админ-панели) больше не говорит «временно» — тот же режим теперь используется и для приостановки проекта на неопределённый срок, не только при инцидентах<br>
@@ -8185,6 +8186,12 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
 <script>
   window.I18N_DICT = {
     en: {
+      // ===== автообновление страницы =====
+      "Вышла новая версия — обновляю…": "A new version is out — updating…",
+      "Вышла новая версия. Обновлю, как только освободишься.": "A new version is out. I will update as soon as you are free.",
+      "Обновить сейчас": "Update now",
+      "Не удалось обновиться само — закрой и открой приложение заново.": "Could not update automatically — close and reopen the app.",
+      "Повторить": "Retry",
       // ===== главный экран / сайдбар =====
       "Игрок": "Player",
       "Тролль": "Troll",
@@ -8307,6 +8314,12 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
       "Заявка на рассмотрении": "Application under review"
     },
     de: {
+      // ===== автообновление страницы =====
+      "Вышла новая версия — обновляю…": "Neue Version verfügbar — aktualisiere…",
+      "Вышла новая версия. Обновлю, как только освободишься.": "Neue Version verfügbar. Ich aktualisiere, sobald du fertig bist.",
+      "Обновить сейчас": "Jetzt aktualisieren",
+      "Не удалось обновиться само — закрой и открой приложение заново.": "Automatisches Update fehlgeschlagen — schließe die App und öffne sie neu.",
+      "Повторить": "Wiederholen",
       "Игрок": "Spieler",
       "Тролль": "Troll",
       "-баттл": "-Battle",
@@ -8473,6 +8486,232 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
   }
 
   if (window.currentLang !== 'ru') window.applyTranslations(document.body);
+</script>
+
+<!-- ===== Автообновление страницы =====
+     Игра живёт часами (Telegram, окно приложения для компьютера, Android
+     WebView), а новая версия попадает на хостинг сразу после сборки — раньше
+     приходилось закрывать и открывать приложение вручную. Метки сборки
+     (BUILD_ID/BUILD_TIME) подставляет .github/scripts/build-obfuscated.js и
+     кладёт ту же пару в build-id.json рядом со страницей; здесь раз в
+     несколько минут (и при возвращении в приложение) читается этот крошечный
+     файл, и если он новее, чем сборка открытой страницы, страница
+     перезагружается сама — но не посреди боя, поиска соперника, входа, ожидания
+     ответа друга или набора текста. Отдельный блок, а не часть основного
+     скрипта: если основной скрипт сломается при выкладке (ошибка на загрузке),
+     этот всё равно отработает и подтянет исправленную версию. В src вместо
+     меток стоят заглушки — тогда автообновление выключено. -->
+<script>
+(function () {
+  const BUILD_ID = '__BUILD_ID__';
+  const BUILD_TIME = Number('__BUILD_TIME__');
+  if (!/^[0-9a-f]{12}$/.test(BUILD_ID) || !(BUILD_TIME > 0)) return;
+  window.__appBuildId = BUILD_ID;
+
+  const CHECK_EVERY_MS = 5 * 60 * 1000;   // как часто спрашивать, пока страница открыта
+  const FIRST_CHECK_MS = 20 * 1000;       // первая проверка — когда страница уже поднялась
+  const MIN_GAP_MS = 45 * 1000;           // не чаще, как бы ни дёргали события
+  const APPLY_POLL_MS = 3000;             // пока обновление ждёт, как часто смотреть «не занят ли»
+  const RELOAD_DELAY_MS = 1200;           // короткая плашка «обновляю…» перед перезагрузкой
+  const FETCH_STALE_MS = 60 * 1000;       // зависший запрос не должен держать обновление вечно
+  const EDIT_HOLD_MS = 2 * 60 * 1000;     // после последней правки человека (ввод, выбор) страницу не трогаем
+  const WAIT_BANNER_AFTER_MS = 8000;      // «Обновлю, как только освободишься» — только если ждём заметно долго
+  const PREFLIGHT_TIMEOUT_MS = 10 * 1000; // сколько ждём ответ нового адреса перед переходом
+  const RETRY_MIN_MS = 60 * 1000;         // если новый адрес не отвечает — повтор через минуту, дальше вдвое реже
+  const RETRY_MAX_MS = 10 * 60 * 1000;
+  // Занятые экраны: бой, поиск соперника, итог боя, лаборатория тем и вход/согласие в первый запуск.
+  const BUSY_OVERLAYS = ['room-overlay', 'warp-overlay', 'battle-result-overlay', 'theme-lab-overlay', 'privacy-consent-overlay', 'login-choice-overlay', 'beta-application-overlay'];
+
+  let lastCheck = 0;
+  let lastEditAt = 0;
+  let pending = null;
+  let reloading = false;
+  let applyTimer = null;
+  let bannerEl = null;
+  let retryAt = 0;
+  let retryDelay = RETRY_MIN_MS;
+
+  // Запросы в полёте считаются «занято»: перезагрузка посреди записи (итог
+  // боя, смена статуса) её оборвёт. Свою проверку версии не считаем — она
+  // идёт через nativeFetch.
+  const inflight = new Map();
+  let seq = 0;
+  const nativeFetch = window.fetch ? window.fetch.bind(window) : null;
+  if (nativeFetch) {
+    window.fetch = function (...args) {
+      const id = ++seq;
+      inflight.set(id, Date.now());
+      return nativeFetch(...args).finally(() => inflight.delete(id));
+    };
+  }
+
+  // Любая настоящая правка человека (набрал, выбрал, сдвинул ползунок, вставил)
+  // — ещё две минуты не перезагружаем: поля формы, в которых он уже закончил,
+  // не видны по фокусу, а несохранённая форма пропала бы целиком.
+  ['input', 'change'].forEach((type) => document.addEventListener(type, (e) => { if (e.isTrusted) lastEditAt = Date.now(); }, true));
+
+  // Ожидание ответа другого человека живёт только в памяти страницы (слушатели
+  // Firebase, не fetch): заявка на вход из Настроек и приглашение друга в бой.
+  function gameWaiting() {
+    try { if (activeLoginRequestPath) return true; } catch (e) { /* переменной нет — основной скрипт не поднялся */ }
+    try { if (myFriendInviteListener) return true; } catch (e) { /* то же */ }
+    return false;
+  }
+
+  function isBusy() {
+    const now = Date.now();
+    for (const startedAt of inflight.values()) if (now - startedAt < FETCH_STALE_MS) return true;
+    const sinceEdit = now - lastEditAt;
+    if (lastEditAt && sinceEdit >= 0 && sinceEdit < EDIT_HOLD_MS) return true;
+    const el = document.activeElement;
+    if (el && (el.tagName === 'TEXTAREA' || el.isContentEditable || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|range|color|file)$/i.test(el.type)))) {
+      if (String((el.isContentEditable ? el.textContent : el.value) || '').trim()) return true;
+    }
+    if (BUSY_OVERLAYS.some((id) => document.getElementById(id)?.classList.contains('open'))) return true;
+    return gameWaiting();
+  }
+
+  const tr = (ru) => (window.t ? window.t(ru) : ru);
+
+  function hideBanner() {
+    if (bannerEl) { bannerEl.remove(); bannerEl = null; }
+  }
+
+  function showBanner(state) {
+    if (!document.body) return;
+    if (!bannerEl) {
+      bannerEl = document.createElement('div');
+      bannerEl.id = 'app-update-banner';
+      bannerEl.setAttribute('role', 'status');
+      bannerEl.style.cssText = 'position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 10px); transform:translateX(-50%); z-index:2147483000; width:max-content; max-width:min(92vw, 420px); display:flex; align-items:center; gap:10px; background:#17171B; color:#F2F1EE; border:1px solid #2A2A30; border-radius:12px; padding:9px 12px; font:600 12.5px/1.35 Inter, system-ui, sans-serif; box-shadow:0 6px 24px rgba(0,0,0,.45);';
+      const text = document.createElement('span');
+      text.id = 'app-update-text';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'app-update-now';
+      btn.style.cssText = 'flex:none; background:#FF3D2E; color:#fff; border:0; border-radius:8px; padding:6px 10px; font:700 12px Inter, system-ui, sans-serif; cursor:pointer;';
+      btn.addEventListener('click', () => reload(true));
+      bannerEl.append(text, btn);
+      document.body.appendChild(bannerEl);
+    }
+    const text = bannerEl.querySelector('#app-update-text');
+    const btn = bannerEl.querySelector('#app-update-now');
+    if (state === 'wait') {
+      text.textContent = tr('Вышла новая версия. Обновлю, как только освободишься.');
+      btn.textContent = tr('Обновить сейчас');
+      btn.style.display = '';
+    } else if (state === 'failed') {
+      text.textContent = tr('Не удалось обновиться само — закрой и открой приложение заново.');
+      btn.textContent = tr('Повторить');
+      btn.style.display = '';
+    } else if (state === 'unavailable') {
+      text.textContent = tr('Не получилось загрузить обновление — проверь связь, попробую позже.');
+      btn.textContent = tr('Повторить');
+      btn.style.display = '';
+    } else {
+      text.textContent = tr('Вышла новая версия — обновляю…');
+      btn.style.display = 'none';
+    }
+  }
+
+  // «Занято» бывает и на долю секунды (идёт запрос) — плашку «подожду» не
+  // показываем сразу, только если обновление ждёт уже заметно долго.
+  function waitBanner() {
+    const waited = Date.now() - pending.since;
+    if (waited < 0 || waited > WAIT_BANNER_AFTER_MS) showBanner('wait');
+  }
+
+  // Сколько раз уже перезагружались ради этой сборки — число записано в самом
+  // адресе (?v=<id>&r=<n>), поэтому работает и без sessionStorage, а каждая
+  // попытка идёт на новый адрес (старый ответ из кэша не подставится).
+  function triesFor(id) {
+    try {
+      const p = new URL(location.href).searchParams;
+      return p.get('v') === id ? Number(p.get('r')) || 0 : 0;
+    } catch (e) { return 0; }
+  }
+
+  // Перед переходом проверяем, что новый адрес отвечает и это действительно
+  // новая сборка: иначе при пропавшей сети или не успевшем обновиться хостинге
+  // рабочая страница сменилась бы страницей ошибки браузера. Ответ остаётся в
+  // кэше, поэтому сам переход его уже не качает заново.
+  async function targetIsReady(href) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), PREFLIGHT_TIMEOUT_MS);
+    try {
+      const res = await nativeFetch(href, { credentials: 'same-origin', signal: ctl.signal });
+      return res.ok && (await res.text()).includes(pending.id);
+    } catch (e) {
+      return false;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // force = человек сам нажал «Обновить сейчас»/«Повторить»
+  async function reload(force) {
+    if (reloading || !pending) return;
+    const now = Date.now();
+    if (retryAt - now > RETRY_MAX_MS) retryAt = 0;   // часы переведены назад
+    if (force) retryAt = 0;
+    if (!force && now < retryAt) return;
+    if (!force && isBusy()) { waitBanner(); return; }
+    const tries = triesFor(pending.id);
+    if (!force && tries >= 2) {
+      // Дважды перезагрузились, а страница всё ещё старая — не крутимся в
+      // цикле, просим открыть приложение заново.
+      showBanner('failed');
+      clearInterval(applyTimer);
+      applyTimer = null;
+      return;
+    }
+    reloading = true;
+    // Адрес с новым ?v=: с тем же адресом браузер/WebView вправе отдать
+    // страницу из кэша; hash (там initData Telegram) остаётся как был.
+    const url = new URL(location.href);
+    url.searchParams.set('v', pending.id);
+    url.searchParams.set('r', String(tries + 1));
+    if (!(await targetIsReady(url.href))) {
+      reloading = false;
+      retryAt = Date.now() + retryDelay;
+      retryDelay = Math.min(retryDelay * 2, RETRY_MAX_MS);
+      if (force) showBanner('unavailable'); else if (bannerEl) hideBanner();
+      return;
+    }
+    retryDelay = RETRY_MIN_MS;
+    showBanner('soon');
+    setTimeout(() => {
+      if (!force && isBusy()) { reloading = false; waitBanner(); return; }
+      location.replace(url.href);
+    }, force ? 0 : RELOAD_DELAY_MS);
+  }
+
+  async function check() {
+    if (!nativeFetch || reloading || document.hidden) return;
+    const now = Date.now();
+    if (now >= lastCheck && now - lastCheck < MIN_GAP_MS) return;
+    lastCheck = now;
+    try {
+      const res = await nativeFetch(new URL('build-id.json', location.href).href + '?_=' + now, { cache: 'no-store' });
+      if (!res.ok) return;
+      const info = await res.json();
+      // Только строго более новая сборка: старый файл из залежавшегося кэша
+      // не должен «обновлять» страницу назад.
+      if (!info || !/^[0-9a-f]{12}$/.test(String(info.id)) || info.id === BUILD_ID || !(Number(info.t) > BUILD_TIME)) return;
+      if (pending && Number(pending.t) >= Number(info.t)) return;
+      pending = { id: info.id, t: Number(info.t), since: pending ? pending.since : now };
+      if (!applyTimer) applyTimer = setInterval(() => reload(false), APPLY_POLL_MS);
+      reload(false);
+    } catch (e) { /* нет сети или файл не наш — проверим в следующий раз */ }
+  }
+
+  setTimeout(check, FIRST_CHECK_MS);
+  setInterval(check, CHECK_EVERY_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+  window.addEventListener('online', () => { retryAt = 0; check(); if (pending) reload(false); });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) check(); });
+  try { window.Telegram?.WebApp?.onEvent?.('activated', check); } catch (e) { /* старый клиент Telegram */ }
+})();
 </script>
 </body>
 </html>
