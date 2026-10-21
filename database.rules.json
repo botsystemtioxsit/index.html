@@ -90,6 +90,14 @@
         }
       }
     },
+    "videochat": {
+      "queue": {
+        ".indexOn": ["at"]
+      },
+      "reports": {
+        ".indexOn": ["status"]
+      }
+    },
     "battles": {
       "$code": {
         ".validate": "newData.hasChildren(['hostId'])"
