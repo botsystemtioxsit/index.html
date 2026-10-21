@@ -202,5 +202,21 @@
     "playerId" : "PLR-5UGKBX",
     "telegramId" : "8455879912",
     "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0"
+  },
+  "-P4S9EyxoflH_UXUdRkA" : {
+    "createdAt" : 1792564330713,
+    "firstName" : "TIOXSIT",
+    "log" : "[08:32:02] Голос (LiveKit): токен получен, identity=host-QBUS9-8ag7s0, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[08:32:02] Голос (LiveKit): состояние: connecting\n[08:32:06] Голос (LiveKit): состояние: connected\n[08:32:06] Голос (LiveKit): подключено и микрофон включён",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) troll-battle-desktop/1.0.4 Chrome/130.0.6723.191 Electron/33.4.11 Safari/537.36"
+  },
+  "-P4S9NcXSP2cF8WFyfOf" : {
+    "createdAt" : 1792564366143,
+    "firstName" : "TIOXSIT",
+    "log" : "[08:32:02] Голос (LiveKit): токен получен, identity=host-QBUS9-8ag7s0, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[08:32:02] Голос (LiveKit): состояние: connecting\n[08:32:06] Голос (LiveKit): состояние: connected\n[08:32:06] Голос (LiveKit): подключено и микрофон включён\n[08:32:44] Голос (LiveKit): состояние: disconnected",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) troll-battle-desktop/1.0.4 Chrome/130.0.6723.191 Electron/33.4.11 Safari/537.36"
   }
 }
