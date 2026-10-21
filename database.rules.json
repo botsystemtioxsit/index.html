@@ -91,11 +91,8 @@
       }
     },
     "videochat": {
-      "queue": {
-        ".indexOn": ["at"]
-      },
-      "reports": {
-        ".indexOn": ["status"]
+      "communities": {
+        ".indexOn": ["joinCode"]
       }
     },
     "battles": {
