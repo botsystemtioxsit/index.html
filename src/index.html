@@ -10,6 +10,19 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>БАТТЛ — Главный экран</title>
+<link id="app-icon" rel="icon" type="image/png" href="logo.png">
+<script>
+/* Значок: в приложении (Electron, Android-оболочка, Telegram) — обычный, в обычном браузере — тот же,
+   но с оранжевым глобусом, чтобы вкладку сразу было видно. Файлы и правила: battle-admin-bot/brand/README.md. */
+(function () {
+  try {
+    var ua = navigator.userAgent || '', hash = location.hash || '';
+    var inApp = /Electron\//.test(ua) || /; wv\)/.test(ua) || /tgWebApp/.test(hash);
+    var l = document.getElementById('app-icon');
+    if (l && !inApp) l.href = 'logo-browser.png';
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -5857,13 +5870,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.59 · бета (LiveKit-ветка)</div>
-        Бета-тест · обновлено 21.10.2026<br>
-        <span style="font-size:11px;">После боя можно пожаловаться на соперника, если он перешёл грань и унижал по национальности, расе или религии: дискриминация в игре запрещена. Обычные оскорбления в бою — часть игры. Жалобы читают модераторы.</span>
+        <div class="v-num">MICBATTLE v0.4.60 · бета (LiveKit-ветка)</div>
+        Бета-тест · обновлено 27.10.2026<br>
+        <span style="font-size:11px;">Новый значок игры: в приложении обычный, во вкладке браузера — тот же, но с оранжевым глобусом.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.59 — После боя можно пожаловаться на соперника, если он перешёл грань и унижал по национальности, расе или религии: дискриминация в игре запрещена. Обычные оскорбления в бою — часть игры. Жалобы читают модераторы.<br>
           v0.4.58 — После боя можно пожаловаться на соперника (угрозы, травля, дискриминация, домогательства, спам). Жалобы читают модераторы в админ-панели<br>
           v0.4.57 — Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас»<br>
           v0.4.56 — В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков»<br>

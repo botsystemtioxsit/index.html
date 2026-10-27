@@ -84,6 +84,9 @@ The game lives for hours in Telegram / the desktop window / the Android WebView,
 ### Firebase project
 `zolotaya-kletka` (config/keys are the public client-side web config, not secret — see the comment above `firebaseConfig`; the real protection boundary is `database.rules.json`, which is intentionally permissive). `firebase.json` deploys only Hosting + Database rules; `.github/workflows/firebase-database-deploy.yml` auto-deploys `database.rules.json`/`firebase.json` on push to `main`.
 
+### Project icons
+The game icon comes from the shared set in the `battle-admin-bot` repo (`brand/`, see its `brand/README.md`): `game-app.png` (red star) for installed apps and `game-browser.png` (same + orange globe) for the web version. Working files here — root `logo.png` / `logo-browser.png` (favicon; a small inline script in `<head>` of `src/index.html` picks the globe variant unless the page runs in Electron, an Android WebView `; wv)` or Telegram `#tgWebApp…`), `desktop/icon.png|ico`, `android/.../mipmap-*` — are generated with `brand/make_icons.py` (`--bg-png` for the game); do not edit them by hand.
+
 ## Working agreement with the owner
 
 The owner is non-technical and Russian-speaking (often dictates by voice). Standing rules, set by them:
