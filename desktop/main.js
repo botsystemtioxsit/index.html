@@ -22,7 +22,6 @@ function createWindow() {
     minWidth: 360,
     minHeight: 640,
     title: 'Тролль-Баттл',
-    icon: path.join(__dirname, 'icon.png'), // значок окна/панели задач — тот же файл, что и у ярлыка меню приложений (см. install-launcher.sh) и у собранного AppImage/.deb (package.json → build.*.icon)
     autoHideMenuBar: true, // строка меню (File/Edit/...) игре не нужна — тут её просто прячем, а не убираем совсем, Alt всё ещё её покажет при необходимости
     backgroundColor: '#0B0B0D', // совпадает с тёмным фоном классической темы игры — без этого при загрузке на миг мелькает белый экран
     webPreferences: {
