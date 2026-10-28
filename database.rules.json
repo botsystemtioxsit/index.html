@@ -1,9 +1,16 @@
 {
   "rules": {
-    ".read": true,
     ".write": true,
+    "$other": {
+      ".read": true
+    },
     "users": {
-      ".indexOn": ["playerId", "role", "pendingNameStatus", "createdAt"],
+      ".indexOn": [
+        "playerId",
+        "role",
+        "pendingNameStatus",
+        "createdAt"
+      ],
       "$uid": {
         "role": {
           ".validate": "newData.val() === 'user' || newData.val() === 'moderator'"
@@ -45,7 +52,8 @@
         "pendingNameRejectionReason": {
           ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
         }
-      }
+      },
+      ".read": true
     },
     "accessTokens": {
       "$token": {
@@ -62,20 +70,34 @@
           "$permKey": {
             ".validate": "newData.isBoolean()"
           }
-        }
-      }
+        },
+        ".read": true
+      },
+      ".read": false
     },
     "logs": {
-      ".indexOn": ["targetKey"]
+      ".indexOn": [
+        "targetKey"
+      ],
+      ".read": true
     },
     "queue": {
-      ".indexOn": ["league"]
+      ".indexOn": [
+        "league"
+      ],
+      ".read": true
     },
     "matches": {
-      ".indexOn": ["finishedAt"]
+      ".indexOn": [
+        "finishedAt"
+      ],
+      ".read": true
     },
     "deviceTrustRequests": {
-      ".indexOn": ["status"]
+      ".indexOn": [
+        "status"
+      ],
+      ".read": true
     },
     "clans": {
       "$code": {
@@ -88,22 +110,55 @@
         "chatLinkStatus": {
           ".validate": "!newData.exists() || newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'rejected'"
         }
-      }
+      },
+      ".read": true
     },
     "videochat": {
       "communities": {
-        ".indexOn": ["joinCode"]
-      }
+        ".indexOn": [
+          "joinCode"
+        ]
+      },
+      ".read": true
     },
     "battles": {
       "$code": {
         ".validate": "newData.hasChildren(['hostId'])"
-      }
+      },
+      ".read": true
     },
     "owners": {
       "$id": {
         ".validate": "!data.exists() && newData.isString() && auth != null && newData.val() === auth.uid"
+      },
+      ".read": false
+    },
+    "emailLogins": {
+      ".read": false,
+      "$key": {
+        ".read": true
       }
+    },
+    "usernames": {
+      ".read": false,
+      "$key": {
+        ".read": true
+      }
+    },
+    "devicePairings": {
+      ".read": false,
+      "$code": {
+        ".read": true
+      }
+    },
+    "googleLinks": {
+      ".read": false
+    },
+    "resetConfirmations": {
+      ".read": false
+    },
+    "assistantRequests": {
+      ".read": false
     }
   }
 }
