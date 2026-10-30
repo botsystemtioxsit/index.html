@@ -218,5 +218,37 @@
     "playerId" : "PLR-A44LA9",
     "telegramId" : "871656058",
     "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) troll-battle-desktop/1.0.4 Chrome/130.0.6723.191 Electron/33.4.11 Safari/537.36"
+  },
+  "-P5CwD15vO1Vq4Jre1X4" : {
+    "createdAt" : 1793382736295,
+    "firstName" : "Гость",
+    "log" : "[20:51:20] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.",
+    "playerId" : "PLR-V72G4S",
+    "telegramId" : "guest_rjrr8o6",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 15; K) Telegram-Android/13.1.1 (Xiaomi 23021RAA2Y; Android 15; SDK 35; HIGH)"
+  },
+  "-P5CwF4Hu9KmaUOUF89L" : {
+    "createdAt" : 1793382744691,
+    "firstName" : "Гость",
+    "log" : "[20:51:20] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.",
+    "playerId" : "PLR-V72G4S",
+    "telegramId" : "guest_rjrr8o6",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 15; K) Telegram-Android/13.1.1 (Xiaomi 23021RAA2Y; Android 15; SDK 35; HIGH)"
+  },
+  "-P5CwQGJYHSscL49R1Kh" : {
+    "createdAt" : 1793382790516,
+    "firstName" : "Гость",
+    "log" : "[20:51:20] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:53:08] JS-ошибка: Script error.",
+    "playerId" : "PLR-V72G4S",
+    "telegramId" : "guest_rjrr8o6",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 15; K) Telegram-Android/13.1.1 (Xiaomi 23021RAA2Y; Android 15; SDK 35; HIGH)"
+  },
+  "-P5Cwi_uZXjNyPan-WJG" : {
+    "createdAt" : 1793382869659,
+    "firstName" : "Гость",
+    "log" : "[20:51:20] Забрать множитель ивента: Firebase Database (${JSCORE_VERSION}) INTERNAL ASSERT FAILED: listen() called twice for same path/queryId.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:19] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:20] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:52:21] JS-ошибка: Script error.\n[20:53:08] JS-ошибка: Script error.\n[20:53:55] JS-ошибка: Script error.\n[20:53:55] JS-ошибка: Script error.\n[20:53:55] JS-ошибка: Script error.\n[20:54:27] JS-ошибка: Script error.\n[20:54:27] JS-ошибка: Script error.\n[20:54:27] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.\n[20:54:28] JS-ошибка: Script error.",
+    "playerId" : "PLR-V72G4S",
+    "telegramId" : "guest_rjrr8o6",
+    "userAgent" : "Mozilla/5.0 (Linux; Android 15; K) Telegram-Android/13.1.1 (Xiaomi 23021RAA2Y; Android 15; SDK 35; HIGH)"
   }
 }
