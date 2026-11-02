@@ -159,6 +159,71 @@
     },
     "assistantRequests": {
       ".read": false
+    },
+    "launcherFeedback": {
+      ".read": false,
+      "$id": {
+        ".read": true,
+        "type": {
+          ".validate": "newData.val() === 'bug' || newData.val() === 'idea' || newData.val() === 'other'"
+        },
+        "text": {
+          ".validate": "newData.isString() && newData.val().length <= 4000"
+        },
+        "status": {
+          ".validate": "newData.val() === 'new' || newData.val() === 'work' || newData.val() === 'done' || newData.val() === 'rejected'"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "shots": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3"
+        },
+        "contact": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "system": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "reply": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "replyAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "account": {
+          "id": {
+            ".validate": "newData.isString() && newData.val().length <= 64"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 64"
+          },
+          "playerId": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "launcherFeedbackShots": {
+      ".read": false,
+      "$id": {
+        ".read": true,
+        "$n": {
+          ".validate": "newData.isString() && newData.val().length <= 400000 && newData.val().matches(/^data:image\\/jpeg;base64,/)"
+        }
+      }
+    },
+    "launcherFeedbackNew": {
+      ".read": false,
+      "$id": {
+        ".validate": "newData.isBoolean()"
+      }
     }
   }
 }

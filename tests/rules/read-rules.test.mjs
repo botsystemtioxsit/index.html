@@ -13,7 +13,8 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   accessTokens:{tok1:{label:'t'}}, emailLogins:{e1:'100'}, usernames:{bob:'100'}, devicePairings:{ABC234:{status:'pending'}},
   owners:{'100':'uidX'}, googleLinks:{x:'y'}, resetConfirmations:{r:{code:1}}, assistantRequests:{a:{messages:1}},
   config:{maintenanceMode:false, closedBeta:false}, errorReports:{e:{m:1}}, logs:{l1:{a:1}}, presence:{'100':true},
-  videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1}
+  videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1},
+  launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true}
 }); });
 const anon = env.unauthenticatedContext().database();
 let fail=0;
@@ -35,5 +36,21 @@ await w('users/100/role','admin',false);   // старое правило сох
 await w('users/100/trustedDevices/k',{a:1},false);
 // транзакция на usernames (как в панели) — нужно чтение по ключу
 let tx; try{ const res=await anon.ref('usernames/newname').transaction(c=>c===null?'100':undefined); tx=res.committed; }catch(e){ tx='ERR '+e.message; } console.log(tx===true?'PASS':'FAIL','transaction usernames/newname',tx); if(tx!==true)fail++;
+// сообщения из лаунчера: список закрыт, по точному ключу читается (статус и ответ), запись — только с допустимыми полями
+for (const p of ['launcherFeedback','launcherFeedbackShots','launcherFeedbackNew']) await r(p,false);
+for (const p of ['launcherFeedback/f1','launcherFeedback/f1/status','launcherFeedbackShots/f1']) await r(p,true);
+await w('launcherFeedback/f2',{type:'idea',text:'Добавьте тёмную тему',status:'new',createdAt:1,shots:0,system:'Windows 11',account:{id:'100',name:'A',playerId:'PLR-1'}},true);
+await w('launcherFeedback/f1/status','done',true); await w('launcherFeedback/f1/reply','Исправлено',true); await w('launcherFeedback/f1/replyAt',5,true);
+await w('launcherFeedback/f3/type','spam',false);                 // неизвестный тип
+await w('launcherFeedback/f3/text','x'.repeat(4001),false);       // слишком длинный текст
+await w('launcherFeedback/f3/status','hacked',false);             // неизвестный статус
+await w('launcherFeedback/f3/shots',9,false);                     // скриншотов не больше трёх
+await w('launcherFeedback/f3/evil','1',false);                    // посторонние поля не принимаются
+await w('launcherFeedback/f3/account/token','1',false);
+await w('launcherFeedbackShots/f2/0','data:image/jpeg;base64,/9j/4AAQ',true);
+await w('launcherFeedbackShots/f2/1','data:text/html;base64,PHNjcmlwdD4=',false);   // только JPEG
+await w('launcherFeedbackShots/f2/2','data:image/jpeg;base64,'+'A'.repeat(400000),false);  // слишком большой
+await w('launcherFeedbackNew/f2',true,true); await w('launcherFeedbackNew/f3','yes',false);
+await w('launcherFeedback/f2',null,true);                          // удаление владельцем
 console.log(fail?('FAILED '+fail):'ALL PASS');
 await env.cleanup();
