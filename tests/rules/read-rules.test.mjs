@@ -14,7 +14,8 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   owners:{'100':'uidX'}, googleLinks:{x:'y'}, resetConfirmations:{r:{code:1}}, assistantRequests:{a:{messages:1}},
   config:{maintenanceMode:false, closedBeta:false}, errorReports:{e:{m:1}}, logs:{l1:{a:1}}, presence:{'100':true},
   videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1},
-  launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true}
+  launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true},
+  gatewayAccounts:{aaaaaaaaaaaaaaaaaaaaaaaa:{name:'Alex',createdAt:1,lastSeen:2,termsV:1}}, gatewayBlocks:{bbbbbbbbbbbbbbbbbbbbbbbb:{at:1,reason:'x',by:'1'}}, gatewayBlockedDevices:{cccccccccccccccccccccccccccccccc:{at:1,reason:'x',by:'1'}}
 }); });
 const anon = env.unauthenticatedContext().database();
 let fail=0;
@@ -52,5 +53,26 @@ await w('launcherFeedbackShots/f2/1','data:text/html;base64,PHNjcmlwdD4=',false)
 await w('launcherFeedbackShots/f2/2','data:image/jpeg;base64,'+'A'.repeat(400000),false);  // слишком большой
 await w('launcherFeedbackNew/f2',true,true); await w('launcherFeedbackNew/f3','yes',false);
 await w('launcherFeedback/f2',null,true);                          // удаление владельцем
+
+// Gateway Plus: аккаунты шлюза. Списком закрыто, по точному ключу читается; блокировки клиент записать не может (пишет только Worker).
+for (const p of ['gatewayAccounts','gatewayBlocks','gatewayBlockedDevices']) await r(p,false);
+for (const p of ['gatewayAccounts/aaaaaaaaaaaaaaaaaaaaaaaa','gatewayBlocks/bbbbbbbbbbbbbbbbbbbbbbbb','gatewayBlockedDevices/cccccccccccccccccccccccccccccccc','gatewayBlocks/zzzzzzzzzzzzzzzzzzzzzzzz']) await r(p,true);
+const ID='dddddddddddddddddddddddd';
+await w('gatewayAccounts/'+ID,{name:'Новый',createdAt:5,lastSeen:5,termsV:1,ver:'2.0.0',dev:'0123456789abcdef0123456789abcdef',servers:1},true);
+await w('gatewayAccounts/'+ID+'/lastSeen',9,true); await w('gatewayAccounts/'+ID+'/servers',2,true);
+await w('gatewayAccounts/'+ID+'/createdAt',99,false);              // дата создания не меняется
+await w('gatewayAccounts/'+ID+'/name','x'.repeat(31),false);       // слишком длинное имя
+await w('gatewayAccounts/'+ID+'/evil','1',false);                  // посторонние поля не принимаются
+await w('gatewayAccounts/'+ID+'/dev','not-hex',false);
+await w('gatewayAccounts/'+ID+'/servers',99,false);
+await w('gatewayAccounts/badid',{name:'A',createdAt:1},false);     // ключ — 24 знака 0-9a-f
+await w('gatewayAccounts/eeeeeeeeeeeeeeeeeeeeeeee',{lastSeen:1},false);   // без имени и даты создания
+await w('gatewayBlocks/'+ID,{at:1,reason:'self',by:'me'},false);   // блокировку клиент поставить/подделать не может
+await w('gatewayBlocks/bbbbbbbbbbbbbbbbbbbbbbbb/reason','edited',false);
+await w('gatewayBlockedDevices/cccccccccccccccccccccccccccccccc/reason','edited',false);
+await w('gatewayBlockedDevices/ffffffffffffffffffffffffffffffff',{at:1},false);
+// ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ: корень базы открыт на запись (.write: true), а .validate на удаление не действует — человек, знающий свой номер, может стереть свою блокировку.
+// Тест фиксирует это, чтобы документация не обещала лишнего (см. CLAUDE.md: «Gateway Plus»). Настоящая защита — отдельная база со строгими правилами.
+await w('gatewayBlocks/bbbbbbbbbbbbbbbbbbbbbbbb',null,true);
 console.log(fail?('FAILED '+fail):'ALL PASS');
 await env.cleanup();
