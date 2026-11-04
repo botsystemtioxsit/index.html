@@ -106,6 +106,21 @@ jobs:
           [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" | npx --yes "$WRANGLER" secret put FIREBASE_SERVICE_ACCOUNT --name "$WORKER_NAME"
 
+      # Отдельная база Gateway Plus (проект Firebase vpn0dns): свой ключ сервисного аккаунта. Секрет GATEWAY_FIREBASE_SERVICE_ACCOUNT этого
+      # репозитория (JSON-ключ проекта vpn0dns). Нет секрета — шаг пропускается, Gateway Plus работает с основной базой, как раньше.
+      - name: Передать Worker'у ключ отдельной базы Gateway Plus (секрет GATEWAY_FIREBASE_SERVICE_ACCOUNT)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GATEWAY_FIREBASE_SERVICE_ACCOUNT: ${{ secrets.GATEWAY_FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$GATEWAY_FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::warning::Секрет GATEWAY_FIREBASE_SERVICE_ACCOUNT не задан — Gateway Plus остаётся на основной базе."
+            exit 0
+          fi
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || unset CLOUDFLARE_ACCOUNT_ID
+          printf '%s' "$GATEWAY_FIREBASE_SERVICE_ACCOUNT" | npx --yes "$WRANGLER" secret put GATEWAY_FIREBASE_SERVICE_ACCOUNT --name "$WORKER_NAME"
+
       - name: Выложить Worker
         working-directory: gateway/cloudflare-worker/role-gateway
         env:
