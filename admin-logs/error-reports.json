@@ -250,5 +250,13 @@
     "playerId" : "PLR-V72G4S",
     "telegramId" : "guest_rjrr8o6",
     "userAgent" : "Mozilla/5.0 (Linux; Android 15; K) Telegram-Android/13.1.1 (Xiaomi 23021RAA2Y; Android 15; SDK 35; HIGH)"
+  },
+  "-P5nIsDjb75WMViZSBd0" : {
+    "createdAt" : 1794009694824,
+    "firstName" : "TIOXSIT",
+    "log" : "[01:01:28] Голос (LiveKit): токен получен, identity=host-5T6XG-fh522a, serverUrl=wss://zolotaya-kletka-a8kq7ior.livekit.cloud\n[01:01:28] Голос (LiveKit): состояние: connecting",
+    "playerId" : "PLR-A44LA9",
+    "telegramId" : "871656058",
+    "userAgent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0"
   }
 }
