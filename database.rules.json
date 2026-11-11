@@ -225,6 +225,12 @@
         ".validate": "newData.isBoolean()"
       }
     },
+    "chatAdmin": {
+      ".read": false,
+      "$chat": {
+        ".validate": false
+      }
+    },
     "gatewayAccounts": {
       ".read": false,
       "$id": {
