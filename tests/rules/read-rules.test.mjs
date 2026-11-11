@@ -15,6 +15,7 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   config:{maintenanceMode:false, closedBeta:false}, errorReports:{e:{m:1}}, logs:{l1:{a:1}}, presence:{'100':true},
   videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1},
   launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true},
+  chatAdmin:{'-1001234567890':{meta:{enabled:true,title:'Чат'},daily:{'2026-11-11':{joins:1}}}},
   gatewayAccounts:{aaaaaaaaaaaaaaaaaaaaaaaa:{name:'Alex',createdAt:1,lastSeen:2,termsV:1}}, gatewayBlocks:{bbbbbbbbbbbbbbbbbbbbbbbb:{at:1,reason:'x',by:'1'}}, gatewayBlockedDevices:{cccccccccccccccccccccccccccccccc:{at:1,reason:'x',by:'1'}}
 }); });
 const anon = env.unauthenticatedContext().database();
@@ -74,5 +75,13 @@ await w('gatewayBlockedDevices/ffffffffffffffffffffffffffffffff',{at:1},false);
 // ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ: корень базы открыт на запись (.write: true), а .validate на удаление не действует — человек, знающий свой номер, может стереть свою блокировку.
 // Тест фиксирует это, чтобы документация не обещала лишнего (см. CLAUDE.md: «Gateway Plus»). Настоящая защита — отдельная база со строгими правилами.
 await w('gatewayBlocks/bbbbbbbbbbbbbbbbbbbbbbbb',null,true);
+// Админ-бот чатов (chatAdmin/<id чата>): имена и входы участников. Не читается никак (даже по точному ключу — читает только панель через Worker
+// /admin-read), клиент ничего не записывает и не меняет: пишет только Worker токеном сервисного аккаунта (правила для него не действуют).
+for (const p of ['chatAdmin','chatAdmin/-1001234567890','chatAdmin/-1001234567890/meta','chatAdmin/-1001234567890/daily']) await r(p,false);
+await w('chatAdmin/-1001234567890/meta/enabled',false,false);       // нельзя выключить/подделать
+await w('chatAdmin/-1009999999999',{meta:{enabled:true}},false);    // нельзя завести чат
+await w('chatAdmin/-1001234567890/daily/2026-11-11/joins',999,false); // нельзя накрутить статистику
+// ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (как у gatewayBlocks): стереть можно, если знаешь точный номер чата — .validate на удаление не действует. Копия базы раз в сутки.
+await w('chatAdmin/-1001234567890',null,true);
 console.log(fail?('FAILED '+fail):'ALL PASS');
 await env.cleanup();
