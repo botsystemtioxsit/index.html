@@ -231,6 +231,12 @@
         ".validate": false
       }
     },
+    "mailer": {
+      ".read": false,
+      "$any": {
+        ".validate": false
+      }
+    },
     "gatewayAccounts": {
       ".read": false,
       "$id": {
