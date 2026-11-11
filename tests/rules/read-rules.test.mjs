@@ -16,6 +16,7 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1},
   launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true},
   chatAdmin:{'-1001234567890':{meta:{enabled:true,title:'Чат'},daily:{'2026-11-11':{joins:1}}}},
+  mailer:{bots:{'111111111':{username:'helper_bot',enc:'v1.AAAA.BBBB'}}, campaigns:{cabc123456:{name:'Анонсы',status:'paused',chats:{'-1001234567890':{title:'Чат'}},senders:{main:true},variants:{v0:{text:'Привет'}}}}, chatLast:{'-1001234567890':1}, log:{'2026-11-11':{x:{at:1,ok:true}}}},
   gatewayAccounts:{aaaaaaaaaaaaaaaaaaaaaaaa:{name:'Alex',createdAt:1,lastSeen:2,termsV:1}}, gatewayBlocks:{bbbbbbbbbbbbbbbbbbbbbbbb:{at:1,reason:'x',by:'1'}}, gatewayBlockedDevices:{cccccccccccccccccccccccccccccccc:{at:1,reason:'x',by:'1'}}
 }); });
 const anon = env.unauthenticatedContext().database();
@@ -83,5 +84,20 @@ await w('chatAdmin/-1009999999999',{meta:{enabled:true}},false);    // нель�
 await w('chatAdmin/-1001234567890/daily/2026-11-11/joins',999,false); // нельзя накрутить статистику
 // ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (как у gatewayBlocks): стереть можно, если знаешь точный номер чата — .validate на удаление не действует. Копия базы раз в сутки.
 await w('chatAdmin/-1001234567890',null,true);
+// Рассылки (mailer): зашифрованные токены ботов и расписание. Не читается никак; клиент не может ни завести рассылку, ни изменить чужую, ни подсунуть
+// бота: рассылки исполняет Worker, и всё, что он исполняет, должно быть написано им самим (токеном сервисного аккаунта; правила для него не действуют).
+for (const p of ['mailer','mailer/bots','mailer/bots/111111111','mailer/bots/111111111/enc','mailer/campaigns','mailer/campaigns/cabc123456','mailer/log','mailer/chatLast']) await r(p,false);
+await w('mailer/campaigns/cnew1234567',{name:'Спам',status:'active',chats:{'-1009999999999':{title:'x'}},senders:{main:true},variants:{v0:{text:'реклама'}}},false); // нельзя завести рассылку
+await w('mailer/campaigns/cabc123456/status','active',false);                                   // нельзя запустить чужую
+await w('mailer/campaigns/cabc123456/chats/-1009999999999',{title:'x'},false);                  // нельзя добавить чат в чужую рассылку
+await w('mailer/campaigns/cabc123456/variants/v0/text','подмена',false);                        // нельзя подменить текст
+await w('mailer/campaigns/cabc123456/senders/222222222',true,false);                            // нельзя добавить отправителя
+await w('mailer/bots/222222222',{username:'evil_bot',enc:'v1.x.y'},false);                      // нельзя подсунуть бота
+await w('mailer/bots/111111111/enc','v1.x.y',false);                                            // нельзя подменить токен
+await w('mailer/pairs/main_-1001234567890',{fails:0},false);                                    // нельзя править здоровье пар
+await w('mailer/chatLast/-1001234567890',0,false);                                              // нельзя сбросить паузу между отправками
+await w('mailer/log/2026-11-11/y',{at:1,ok:true},false);                                        // нельзя писать в журнал
+// ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (как у chatAdmin и gatewayBlocks): .validate на удаление не действует — стереть можно, если знаешь точный путь (номер рассылки случайный).
+await w('mailer/campaigns/cabc123456',null,true);
 console.log(fail?('FAILED '+fail):'ALL PASS');
 await env.cleanup();
