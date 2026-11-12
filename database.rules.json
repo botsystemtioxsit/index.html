@@ -231,6 +231,12 @@
         ".validate": false
       }
     },
+    "appGrants": {
+      ".read": false,
+      "$uid": {
+        ".validate": false
+      }
+    },
     "mailer": {
       ".read": false,
       "$any": {

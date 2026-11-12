@@ -15,7 +15,8 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   config:{maintenanceMode:false, closedBeta:false}, errorReports:{e:{m:1}}, logs:{l1:{a:1}}, presence:{'100':true},
   videochat:{communities:{'-1':{joinCode:'ZZZ111'}}}, clans:{c1:{name:'x'}}, battles:{b1:{hostId:'100'}}, matches:{m1:{finishedAt:1}}, queue:{}, leaderboardNew:{a:1},
   launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true},
-  chatAdmin:{'-1001234567890':{meta:{enabled:true,title:'Чат'},daily:{'2026-11-11':{joins:1}}}},
+  chatAdmin:{'-1001234567890':{meta:{enabled:true,title:'Чат'},daily:{'2026-11-11':{joins:1}}}, _owners:{'700':{'-1001234567890':{title:'Чат'}}}},
+  appGrants:{'200':{chats:true}},
   mailer:{bots:{'111111111':{username:'helper_bot',enc:'v1.AAAA.BBBB'}}, campaigns:{cabc123456:{name:'Анонсы',status:'paused',chats:{'-1001234567890':{title:'Чат'}},senders:{main:true},variants:{v0:{text:'Привет'}}}}, chatLast:{'-1001234567890':1}, log:{'2026-11-11':{x:{at:1,ok:true}}}},
   gatewayAccounts:{aaaaaaaaaaaaaaaaaaaaaaaa:{name:'Alex',createdAt:1,lastSeen:2,termsV:1}}, gatewayBlocks:{bbbbbbbbbbbbbbbbbbbbbbbb:{at:1,reason:'x',by:'1'}}, gatewayBlockedDevices:{cccccccccccccccccccccccccccccccc:{at:1,reason:'x',by:'1'}}
 }); });
@@ -84,6 +85,12 @@ await w('chatAdmin/-1009999999999',{meta:{enabled:true}},false);    // нель�
 await w('chatAdmin/-1001234567890/daily/2026-11-11/joins',999,false); // нельзя накрутить статистику
 // ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (как у gatewayBlocks): стереть можно, если знаешь точный номер чата — .validate на удаление не действует. Копия базы раз в сутки.
 await w('chatAdmin/-1001234567890',null,true);
+// Права админов по приложениям (appGrants/<uid>) и владельцы чатов (chatAdmin/_owners): не читаются и не пишутся клиентом —
+// иначе любой выдал бы себе «Чаты», «VPN» или чужой чат. Пишет только Worker (токен сервисного аккаунта).
+for (const p of ['appGrants','appGrants/200','appGrants/200/chats','chatAdmin/_owners','chatAdmin/_owners/700']) await r(p,false);
+await w('appGrants/300/chats',true,false);
+await w('appGrants/200',{chats:true,gateway:true},false);
+await w('chatAdmin/_owners/300/-1009999999999',{title:'чужой'},false); // нельзя назначить себя владельцем чата
 // Рассылки (mailer): зашифрованные токены ботов и расписание. Не читается никак; клиент не может ни завести рассылку, ни изменить чужую, ни подсунуть
 // бота: рассылки исполняет Worker, и всё, что он исполняет, должно быть написано им самим (токеном сервисного аккаунта; правила для него не действуют).
 for (const p of ['mailer','mailer/bots','mailer/bots/111111111','mailer/bots/111111111/enc','mailer/campaigns','mailer/campaigns/cabc123456','mailer/log','mailer/chatLast']) await r(p,false);
