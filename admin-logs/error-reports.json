@@ -1,21 +1,21 @@
 {
   "-P1gjXtbitY-rh2YBYQm" : {
     "createdAt" : 1789604539994,
-    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/<почта скрыта>\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
     "telegramId" : "guest_49zb9om",
     "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
   },
   "-P1gm50COQqHUO9zg07x" : {
     "createdAt" : 1789605207529,
     "firstName" : "Гость",
-    "log" : "[02:33:22] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "log" : "[02:33:22] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/<почта скрыта>\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
     "playerId" : "PLR-ZGA9XJ",
     "telegramId" : "guest_4bi6wk6",
     "userAgent" : "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
   },
   "-P1gnkB1r3Izpl-8n3lN" : {
     "createdAt" : 1789605643004,
-    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"\n[02:40:30] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/alexander13rudermehl@gmail.com\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
+    "log" : "[02:22:15] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/<почта скрыта>\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"\n[02:40:30] Запрос входа: child failed: path argument was an invalid path = \"accessTokens/<почта скрыта>\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"",
     "telegramId" : "guest_49zb9om",
     "userAgent" : "Mozilla/5.0 (Linux; Android 17; SM-S948B Build/CP2A.260605.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.87 Mobile Safari/537.36"
   },
