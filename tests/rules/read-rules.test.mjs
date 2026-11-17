@@ -17,6 +17,7 @@ await env.withSecurityRulesDisabled(async (c)=>{ await c.database().ref('/').set
   launcherFeedback:{f1:{type:'bug',text:'x',status:'new',createdAt:1,shots:1}}, launcherFeedbackShots:{f1:{0:'data:image/jpeg;base64,AAAA'}}, launcherFeedbackNew:{f1:true},
   chatAdmin:{'-1001234567890':{meta:{enabled:true,title:'Чат'},daily:{'2026-11-11':{joins:1}}}, _owners:{'700':{'-1001234567890':{title:'Чат'}}}},
   appGrants:{'200':{chats:true}},
+  videochatKeeper:{enabled:true,chats:{'-1001234567890':{at:1}}},
   mailer:{bots:{'111111111':{username:'helper_bot',enc:'v1.AAAA.BBBB'}}, campaigns:{cabc123456:{name:'Анонсы',status:'paused',chats:{'-1001234567890':{title:'Чат'}},senders:{main:true},variants:{v0:{text:'Привет'}}}}, chatLast:{'-1001234567890':1}, log:{'2026-11-11':{x:{at:1,ok:true}}}},
   gatewayAccounts:{aaaaaaaaaaaaaaaaaaaaaaaa:{name:'Alex',createdAt:1,lastSeen:2,termsV:1}}, gatewayBlocks:{bbbbbbbbbbbbbbbbbbbbbbbb:{at:1,reason:'x',by:'1'}}, gatewayBlockedDevices:{cccccccccccccccccccccccccccccccc:{at:1,reason:'x',by:'1'}}
 }); });
@@ -91,6 +92,10 @@ for (const p of ['appGrants','appGrants/200','appGrants/200/chats','chatAdmin/_o
 await w('appGrants/300/chats',true,false);
 await w('appGrants/200',{chats:true,gateway:true},false);
 await w('chatAdmin/_owners/300/-1009999999999',{title:'чужой'},false); // нельзя назначить себя владельцем чата
+// Хранитель видеочата: список групп читается (его читает задача GitHub без ключа), но менять его может только Worker
+await r('videochatKeeper/chats',true);
+await w('videochatKeeper/chats/-1009999999999',{at:1},false);
+await w('videochatKeeper/enabled',false,false);
 // Рассылки (mailer): зашифрованные токены ботов и расписание. Не читается никак; клиент не может ни завести рассылку, ни изменить чужую, ни подсунуть
 // бота: рассылки исполняет Worker, и всё, что он исполняет, должно быть написано им самим (токеном сервисного аккаунта; правила для него не действуют).
 for (const p of ['mailer','mailer/bots','mailer/bots/111111111','mailer/bots/111111111/enc','mailer/campaigns','mailer/campaigns/cabc123456','mailer/log','mailer/chatLast']) await r(p,false);
