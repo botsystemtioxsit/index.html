@@ -243,6 +243,12 @@
         ".validate": false
       }
     },
+    "videochatKeeper": {
+      ".read": true,
+      "$any": {
+        ".validate": false
+      }
+    },
     "gatewayAccounts": {
       ".read": false,
       "$id": {
