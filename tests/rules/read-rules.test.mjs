@@ -83,6 +83,11 @@ await w('gatewayBlocks/bbbbbbbbbbbbbbbbbbbbbbbb',null,true);
 for (const p of ['chatAdmin','chatAdmin/-1001234567890','chatAdmin/-1001234567890/meta','chatAdmin/-1001234567890/daily']) await r(p,false);
 await w('chatAdmin/-1001234567890/meta/enabled',false,false);       // нельзя выключить/подделать
 await w('chatAdmin/-1009999999999',{meta:{enabled:true}},false);    // нельзя завести чат
+// Бан по устройству: метки устройств человека не читаются (иначе их можно было бы подсмотреть и подсунуть чужую); клиент пишет только свою метку (24 hex → время);
+// список забаненных устройств читается только по точному ключу, а записывает его один Worker.
+await r('deviceTags',false); await r('deviceTags/700',false); await r('bannedDevices',false);
+await w('deviceTags/700/aaaaaaaaaaaaaaaaaaaaaaaa',1,true); await w('deviceTags/700/zz',1,false); await w('deviceTags/700/bbbbbbbbbbbbbbbbbbbbbbbb','x',false);
+await w('bannedDevices/cccccccccccccccccccccccc',{at:1},false);
 await w('chatAdmin/-1001234567890/daily/2026-11-11/joins',999,false); // нельзя накрутить статистику
 // ИЗВЕСТНОЕ ОГРАНИЧЕНИЕ (как у gatewayBlocks): стереть можно, если знаешь точный номер чата — .validate на удаление не действует. Копия базы раз в сутки.
 await w('chatAdmin/-1001234567890',null,true);

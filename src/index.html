@@ -5857,13 +5857,14 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
         <a href="privacy.html" target="_blank" rel="noopener" style="display:inline-block; background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; text-decoration:none;">Политика конфиденциальности</a>
       </div>
       <div class="version-block">
-        <div class="v-num">MICBATTLE v0.4.59 · бета (LiveKit-ветка)</div>
+        <div class="v-num">MICBATTLE v0.4.60 · бета (LiveKit-ветка)</div>
         Бета-тест · обновлено 21.10.2026<br>
         <span style="font-size:11px;">После боя можно пожаловаться на соперника, если он перешёл грань и унижал по национальности, расе или религии: дискриминация в игре запрещена. Обычные оскорбления в бою — часть игры. Жалобы читают модераторы.</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
         <button id="btn-history-toggle" style="background:none; border:1px solid var(--line); color:var(--muted); font-size:11px; border-radius:8px; padding:4px 10px; cursor:pointer;">Вся история версий</button>
         <div id="version-history-full" style="display:none; text-align:left; font-size:10.5px; color:var(--muted); margin-top:10px; line-height:1.6;">
+          v0.4.59 — Блокировка по устройству: если администрация заблокировала человека везде, его устройство тоже не пускает в игру.<br>
           v0.4.58 — После боя можно пожаловаться на соперника (угрозы, травля, дискриминация, домогательства, спам). Жалобы читают модераторы в админ-панели<br>
           v0.4.57 — Игра сама обновляется до новой версии, пока открыта: не нужно закрывать и открывать приложение. Обновление подхватывается не посреди боя, поиска соперника, входа, ожидания друга или набора текста — тогда сверху появится кнопка «Обновить сейчас»<br>
           v0.4.56 — В Android-приложении в настройках теперь видна версия самого приложения (и она же — в сообщении о запросе на вход), чтобы отличать новое от старого. Значок приложения — адаптивный, с поддержкой «тематических значков»<br>
@@ -7110,8 +7111,20 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
   // config/closedBeta читаем параллельно с самим аккаунтом (не отдельным
   // .then() после) — важен только для НОВЫХ визитёров (см. else ниже),
   // у кого уже есть аккаунт, он всегда открывается как обычно.
-  return Promise.all([userRef.get(), db.ref('config/closedBeta').once('value')]).then(([snap, closedBetaSnap]) => {
+  // Бан по устройству: у каждого устройства своя случайная метка (общая для игры и ВидеоЧата — тот же адрес сайта). Её привязывают к аккаунту
+  // (deviceTags/<id>/<метка> — не читается никем, кроме Worker), а если устройство в списке bannedDevices — доступ закрыт, как у забаненного.
+  let deviceBanned = false;
+  const devTag = (function () {
+    try {
+      let t = localStorage.getItem('battleDeviceTag');
+      if (!/^[a-f0-9]{24}$/.test(t || '')) { const a = new Uint8Array(12); crypto.getRandomValues(a); t = Array.from(a, (b) => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('battleDeviceTag', t); }
+      return t;
+    } catch (e) { return null; }
+  })();
+  return Promise.all([userRef.get(), db.ref('config/closedBeta').once('value'), devTag ? db.ref('bannedDevices/' + devTag).once('value').catch(() => null) : null]).then(([snap, closedBetaSnap, devBanSnap]) => {
     let userData;
+    deviceBanned = !!(devBanSnap && devBanSnap.exists());
+    if (devTag) db.ref('deviceTags/' + telegramId + '/' + devTag).set(Date.now()).catch(() => {});
 
     if (snap.exists()) {
       // такой Telegram-аккаунт уже заходил — просто достаём его данные, ID не трогаем
@@ -7572,7 +7585,7 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
 
     // если игрок забанен или временно ограничен — блокируем доступ к приложению
     const now = Date.now();
-    const isBanned = userData.status === 'banned';
+    const isBanned = userData.status === 'banned' || deviceBanned;
     const isRestricted = userData.status === 'restricted' && userData.restrictedUntil && userData.restrictedUntil > now;
 
     if (isBanned || isRestricted) {
@@ -7583,7 +7596,7 @@ sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64</code></
           </div>
           <div style="color:#8A8A92; font-size:14px; max-width:280px; line-height:1.5;">
             ${isBanned
-              ? 'Твой аккаунт заблокирован администрацией навсегда.'
+              ? (deviceBanned && userData.status !== 'banned' ? 'Это устройство заблокировано администрацией навсегда.' : 'Твой аккаунт заблокирован администрацией навсегда.')
               : `Доступ ограничен до ${new Date(userData.restrictedUntil).toLocaleString('ru-RU')}.`}
           </div>
         </div>
