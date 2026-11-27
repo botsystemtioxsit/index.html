@@ -225,6 +225,22 @@
         ".validate": "newData.isBoolean()"
       }
     },
+    "deviceTags": {
+      ".read": false,
+      "$uid": {
+        ".read": false,
+        "$tag": {
+          ".validate": "$tag.matches(/^[a-f0-9]{24}$/) && newData.isNumber()"
+        }
+      }
+    },
+    "bannedDevices": {
+      ".read": false,
+      "$tag": {
+        ".read": true,
+        ".validate": false
+      }
+    },
     "chatAdmin": {
       ".read": false,
       "$chat": {
